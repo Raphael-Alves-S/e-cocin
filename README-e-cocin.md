@@ -239,3 +239,51 @@ e-cocin build OK
 ```
 
 Tudo certo 🎉
+
+
+por que usamos virtual nos métodos do repositório?
+→ porque o repositório é uma interface, não uma implementação.
+
+Em C++, quando você quer declarar uma interface (como em Java), você faz isso usando métodos virtuais puros (= 0) dentro de uma classe-base.
+
+🧱 exemplo prático (seu caso)
+class IClientRepository {
+public:
+    virtual ~IClientRepository() = default;
+
+    virtual Client create(const Client& in) = 0;
+    virtual std::optional<Client> findById(long long id) = 0;
+    virtual std::vector<Client> listAll() = 0;
+    virtual bool update(const Client& c) = 0;
+    virtual bool remove(long long id) = 0;
+};
+
+
+➡️ Aqui, IClientRepository é abstrata — você não pode instanciá-la diretamente.
+
+Depois, uma classe concreta implementa essa interface:
+
+class ClientRepositorySqlite : public IClientRepository {
+public:
+    Client create(const Client& in) override;
+    std::optional<Client> findById(long long id) override;
+    std::vector<Client> listAll() override;
+    bool update(const Client& c) override;
+    bool remove(long long id) override;
+};
+
+⚙️ o que significa cada parte
+
+virtual → permite que o método seja sobrescrito (override) em classes derivadas.
+
+= 0 → indica que é puro, ou seja, a classe não fornece implementação (é abstrata).
+
+override (na implementação) → avisa ao compilador que você está substituindo um método virtual da base.
+
+
+benefícios do uso de virtual
+
+✅ Abstração — você programa contra a interface (IClientRepository* repo) e não a implementação.
+✅ Inversão de dependência — facilita testes unitários (mockar um repositório sem precisar do banco).
+✅ Flexibilidade — no futuro, pode ter ClientRepositoryPostgres, ClientRepositoryInMemory, etc.
+✅ Polimorfismo — permite trocar a implementação sem mudar quem usa a interface.
