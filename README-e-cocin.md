@@ -182,7 +182,7 @@ cmake -G "MinGW Makefiles" -B build -S . -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCM
 cmake --build build -j
 
 # Executar
-./build/ecommerce.exe
+./build/e-cocin.exe
 
 # Testes (opcional)
 ctest --test-dir build --output-on-failure
