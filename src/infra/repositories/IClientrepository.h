@@ -1,0 +1,23 @@
+#ifndef ECOCIN_INFRA_REPOSITORIES_ICLIENTREPOSITORY_H
+#define ECOCIN_INFRA_REPOSITORIES_ICLIENTREPOSITORY_H
+
+#include <vector>
+#include <optional>
+#include "../../domain/entities/Client.h"
+
+namespace ecocin::infra::repositories {
+
+class IClientRepository {
+public:
+    virtual ~IClientRepository() = default;
+
+    virtual Client create(const Client& in) = 0;
+    virtual std::optional<Client> findById(long long id) = 0;
+    virtual std::vector<Client> listAll() = 0;
+    virtual bool update(const Client& c) = 0;
+    virtual bool remove(long long id) = 0;
+};
+
+} // namespace ecocin::infra::repositories
+
+#endif // ECOCIN_INFRA_REPOSITORIES_ICLIENTREPOSITORY_H
