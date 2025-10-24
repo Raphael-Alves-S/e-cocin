@@ -5,7 +5,8 @@
         "vector": "cpp",
         "ostream": "cpp",
         "xstring": "cpp",
-        "chrono": "cpp"
+        "chrono": "cpp",
+        "optional": "cpp"
     },
     "C_Cpp.configurationProvider": "ms-vscode.cmake-tools",
     "C_Cpp.default.compilerPath": "C:/msys64/mingw64/bin/g++.exe",
