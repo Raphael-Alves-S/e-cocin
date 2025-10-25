@@ -6,24 +6,24 @@
 
 class Address {
 private:
-    long long id_;
-    long long client_id_;
-    std::string street_;
-    std::string number_;
-    std::string city_;
-    std::string state_;
-    std::string zip_;
-    std::string addressType_;
+    long long id_;          // Identificador único do endereço
+    long long client_id_;   // Identificador do cliente ao qual o endereço pertence
+    std::string street_;    // rua
+    std::string number_;    // número
+    std::string city_;      // cidade
+    std::string state_;     // estado
+    std::string zip_;       // CEP
+    std::string addressType_;   // tipo de endereço (residencial, comercial, etc.)
 
 public:
     // Construtores
     Address();
-    Address(const std::string& street,
-            const std::string& number,
-            const std::string& city,
-            const std::string& state,
-            const std::string& zip,
-            const std::string& addressType);
+    Address(const std::string& street,  // rua
+            const std::string& number,  // número
+            const std::string& city,    // cidade
+            const std::string& state,   // estado
+            const std::string& zip,     // CEP
+            const std::string& addressType);    // tipo de endereço (residencial, comercial, etc.)
     // Getters
     long long           getId() const { return id_; }
     long long           getClientId() const { return client_id_; }

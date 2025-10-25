@@ -13,12 +13,12 @@ Address::Address(const std::string& street,
       zip_(zip),
       addressType_(addressType) {}
 
-// Address::Address()
-//     : id_(0),
-//       client_id_(0),
-//       street_(""),
-//       number_(""),
-//       city_(""),
-//       state_(""),
-//       zip_(""),
-//       addressType_("") {}
+Address::Address()
+    : id_(0),
+      client_id_(0),
+      street_(""),
+      number_(""),
+      city_(""),
+      state_(""),
+      zip_(""),
+      addressType_("") {}
