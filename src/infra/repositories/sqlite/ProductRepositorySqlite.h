@@ -1,7 +1,7 @@
 #ifndef ECOCIN_INFRA_REPOSITORIES_SQLITE_PRODUCTREPOSITORYSQLITE_H
 #define ECOCIN_INFRA_REPOSITORIES_SQLITE_PRODUCTREPOSITORYSQLITE_H
 
-#include "../IProductRepository.h"
+#include "../../domain/repositories/IProductRepository.h"
 #include "../../db/SqliteConnection.h"
 
 namespace ecocin::infra::repositories::sqlite {

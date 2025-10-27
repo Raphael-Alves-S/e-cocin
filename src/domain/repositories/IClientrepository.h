@@ -5,7 +5,7 @@
 #include <optional>
 #include "../../domain/entities/Client.h"
 
-namespace ecocin::infra::repositories {
+namespace ecocin::domain::repositories {
 
 class IClientRepository {
 public:

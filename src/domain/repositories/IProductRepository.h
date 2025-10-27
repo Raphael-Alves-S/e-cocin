@@ -5,7 +5,7 @@
 #include <optional>
 #include "../../domain/entities/Product.h"
 
-namespace ecocin::infra::repositories {
+namespace ecocin::domain::repositories {
 
 class IProductRepository {
 public:
