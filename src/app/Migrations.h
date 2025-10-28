@@ -44,6 +44,26 @@ CREATE TABLE IF NOT EXISTS products (
 CREATE INDEX IF NOT EXISTS idx_products_name       ON products(name);
 CREATE INDEX IF NOT EXISTS idx_products_is_active  ON products(is_active);
 
+-- ===========================
+-- Tabela: addresses 
+-- ===========================
+CREATE TABLE IF NOT EXISTS addresses (  
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  client_id       INTEGER NOT NULL,
+  street          TEXT    NOT NULL,
+  number          TEXT    NOT NULL,
+  city            TEXT    NOT NULL,
+  state           TEXT    NOT NULL,
+  zip             TEXT    NOT NULL,
+  address_type    TEXT    NOT NULL,
+  create_date      INTEGER NOT NULL,           -- epoch seconds
+
+
+  FOREIGN KEY (client_id) REFERENCES clients(id)
+);
+-- Índices auxiliares
+CREATE INDEX IF NOT EXISTS idx_addresses_client_id ON addresses(client_id);
+CREATE INDEX IF NOT EXISTS idx_addresses_zip ON addresses(zip);
 )SQL";
 
 // Executa o SQL acima (lança std::runtime_error em caso de falha)

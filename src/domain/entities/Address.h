@@ -3,6 +3,7 @@
 
 #include <string>
 #include "core/Uuid.h"
+#include <chrono>
 
 class Address {
 private:
@@ -14,16 +15,20 @@ private:
     std::string state_;     // estado
     std::string zip_;       // CEP
     std::string addressType_;   // tipo de endereço (residencial, comercial, etc.)
+    std::chrono::system_clock::time_point createDate_;  // data de criação
 
 public:
     // Construtores
     Address();
-    Address(const std::string& street,  // rua
+    Address(long long client_id,        // Identificador do cliente ao qual o endereço pertence
+            const std::string& street,  // rua
             const std::string& number,  // número
             const std::string& city,    // cidade
             const std::string& state,   // estado
             const std::string& zip,     // CEP
-            const std::string& addressType);    // tipo de endereço (residencial, comercial, etc.)
+            const std::string& addressType,    // tipo de endereço (residencial, comercial, etc.)
+            const std::chrono::system_clock::time_point& createDate);
+            
     // Getters
     long long           getId() const { return id_; }
     long long           getClientId() const { return client_id_; }
@@ -33,6 +38,7 @@ public:
     const std::string& getState() const { return state_; }
     const std::string& getZip() const { return zip_; }
     const std::string& getAddressType() const { return addressType_; }
+    const std::chrono::system_clock::time_point& getCreateDate() const { return createDate_; }
 
     // Setters
     void setId(long long id) { id_ = id; }
@@ -43,6 +49,7 @@ public:
     void setState(const std::string& state) { state_ = state; }
     void setZip(const std::string& zip) { zip_ = zip; }
     void setAddressType(const std::string& addressType) { addressType_ = addressType; }
+    void setCreateDate(const std::chrono::system_clock::time_point& createDate) { createDate_ = createDate; }
 
 };
 #endif

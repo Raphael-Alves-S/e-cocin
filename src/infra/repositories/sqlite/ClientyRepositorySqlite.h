@@ -1,7 +1,7 @@
 #ifndef ECOCIN_INFRA_REPOSITORIES_SQLITE_CLIENTREPOSITORYSQLITE_H
 #define ECOCIN_INFRA_REPOSITORIES_SQLITE_CLIENTREPOSITORYSQLITE_H
 
-#include "../IClientRepository.h"
+#include "../../domain/repositories/IClientRepository.h"
 #include "../../db/SqliteConnection.h"
 
 namespace ecocin::infra::repositories::sqlite {
