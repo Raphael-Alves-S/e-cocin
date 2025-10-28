@@ -17,7 +17,7 @@ static Client row_to_client(sqlite3_stmt* s) {
 }
 
 Client ClientRepositorySqlite::create(const Client& in) {
-    Client client = in;
+    Client client = in;    
     // created_at agora
     auto now = std::chrono::system_clock::now();
     auto epoch = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();

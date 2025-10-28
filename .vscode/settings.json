@@ -6,7 +6,15 @@
         "ostream": "cpp",
         "xstring": "cpp",
         "chrono": "cpp",
-        "optional": "cpp"
+        "optional": "cpp",
+        "locale": "cpp",
+        "thread": "cpp",
+        "xlocale": "cpp",
+        "xlocmes": "cpp",
+        "xlocmon": "cpp",
+        "xlocnum": "cpp",
+        "xloctime": "cpp",
+        "text_encoding": "cpp"
     },
     "C_Cpp.configurationProvider": "ms-vscode.cmake-tools",
     "C_Cpp.default.compilerPath": "C:/msys64/mingw64/bin/g++.exe",

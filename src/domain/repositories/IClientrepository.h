@@ -13,6 +13,7 @@ public:
 
     virtual Client create(const Client& in) = 0;
     virtual std::optional<Client> findById(long long id) = 0;
+    virtual std::optional<Client> findByCpf(const std::string& cpf) = 0;
     virtual std::vector<Client> listAll() = 0;
     virtual bool update(const Client& c) = 0;
     virtual bool remove(long long id) = 0;
