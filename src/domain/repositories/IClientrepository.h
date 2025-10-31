@@ -1,8 +1,9 @@
-#ifndef ECOCIN_INFRA_REPOSITORIES_ICLIENTREPOSITORY_H
-#define ECOCIN_INFRA_REPOSITORIES_ICLIENTREPOSITORY_H
+#ifndef ECOCIN_DOMAIN_REPOSITORIES_ICLIENTREPOSITORY_H
+#define ECOCIN_DOMAIN_REPOSITORIES_ICLIENTREPOSITORY_H
 
 #include <vector>
 #include <optional>
+#include <string>
 #include "../../domain/entities/Client.h"
 
 namespace ecocin::domain::repositories {
@@ -19,6 +20,6 @@ public:
     virtual bool remove(long long id) = 0;
 };
 
-} // namespace ecocin::infra::repositories
+} // namespace ecocin::domain::repositories
 
-#endif // ECOCIN_INFRA_REPOSITORIES_ICLIENTREPOSITORY_H
+#endif

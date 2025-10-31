@@ -1,51 +1,29 @@
 #ifndef ECOCIN_SERVICES_CLIENTSERVICE_H
 #define ECOCIN_SERVICES_CLIENTSERVICE_H 
+#include "../domain/entities/Client.h"
+#include <string>
+#include <vector>
+#include <optional>
+
 
 #include "../infra/repositories/sqlite/ClientRepositorySqlite.h"
 
 namespace ecocin::services {
-    class ClientService {
-    private:
-        infra::repositories::sqlite::ClientRepositorySqlite& clientRepo_;
 
-    public:
-        explicit ClientService(infra::repositories::sqlite::ClientRepositorySqlite& clientRepo)
-            : clientRepo_(clientRepo) {}
+class ClientService {
+public:
+    explicit ClientService(ecocin::infra::repositories::sqlite::ClientRepositorySqlite& clientRepo);
+    std::string createClient(const Client& client);
+    std::optional<Client> getClientByCpf(const std::string& cpf);
+    bool clientExists(const std::string& cpf);
+    std::vector<Client> listAllClients();
+    bool updateClient(const Client& client);
+    std::string removeClientMessage(const std::string& cpf);
 
+private:
+    ecocin::infra::repositories::sqlite::ClientRepositorySqlite& clientRepo_;
+};
 
-       std::string createClient(const Client& client) {
-            if (clientExists(client.getCpf())) {
-                throw std::runtime_error("Client with CPF already exists");
-            }
-            clientRepo_.create(client);
-            return "Client created successfully";
-
-        }
-
-        std::optional<Client> getClientById(long long id) {
-            return clientRepo_.findById(id);
-        }
-
-      std::optional<Client> getClientByCpf(const std::string& cpf) {
-            return clientRepo_.findByCpf(cpf);
-        }
-
-       bool clientExists(const std::string& cpf) {
-            return clientRepo_.findByEmail(email).has_value();
-        }
-
-        std::vector<Client> listAllClients() {
-            return clientRepo_.listAll();
-        }
-
-        bool updateClient(const Client& client) {
-            return clientRepo_.update(client);
-        }
-
-        bool removeClient(long long id) {
-            return clientRepo_.remove(id);
-        }
-    };
 }
 
 #endif // ECOCIN_SERVICES_CLIENTSERVICE_H
