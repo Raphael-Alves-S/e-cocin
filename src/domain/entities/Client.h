@@ -2,7 +2,7 @@
 #define ECOCIN_ENTITIES_CLIENT_H
 
 #include <string>
-#include "core/Time.h"
+#include "../core/Time.h"
 
 class Client{
     private:
