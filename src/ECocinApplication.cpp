@@ -15,6 +15,11 @@
 #include "services/ClientService.h"
 #include "controllers/ClientController.h"
 
+#include "controllers/ProductController.h"
+#include "infra/repositories/sqlite/ProductRepositorySqlite.h"
+#include "services/ProductService.h"
+
+
 int main() {
   // Migrations
   ecocin::infra::db::SqliteConnection cx{"e-cocin.db"};
@@ -24,6 +29,10 @@ int main() {
   auto clientRepo    = std::make_shared<ecocin::infra::repositories::sqlite::ClientRepositorySqlite>(cx);
   auto clientService = std::make_shared<ecocin::services::ClientService>(*clientRepo);
 
+  // Product Repo + Service
+  auto productRepo    = std::make_shared<ecocin::infra::repositories::sqlite::ProductRepositorySqlite>(cx);
+  auto productService = std::make_shared<ecocin::services::ProductService>(*productRepo);
+
   // OATPP
   oatpp::Environment::init();
 
@@ -32,6 +41,9 @@ int main() {
 
   auto controller = std::make_shared<ClientController>(objectMapper, clientService);
   router->addController(controller);
+
+  auto productController = std::make_shared<ProductController>(objectMapper, productService);
+  router->addController(productController);
 
   auto connectionHandler = oatpp::web::server::HttpConnectionHandler::createShared(router);
   auto provider = oatpp::network::tcp::server::ConnectionProvider::createShared(

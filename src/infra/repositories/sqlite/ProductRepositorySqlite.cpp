@@ -41,7 +41,7 @@ Product ProductRepositorySqlite::create(const Product& in) {
     p.setCreateDate(now);
 
     const char* sql =
-        "INSERT INTO products(name, description, sku, price, stock, is_active, create_date) "
+        "INSERT INTO products(name, description, sku, price, stock_quantity, is_active, create_date) "
         "VALUES(?,?,?,?,?,?,?)";
 
     sqlite3_stmt* st = nullptr;
@@ -52,7 +52,7 @@ Product ProductRepositorySqlite::create(const Product& in) {
     // 2 description (string; pode ser vazia)
     sqlite3_bind_text(st, 2, p.getDescription().c_str(), -1, SQLITE_TRANSIENT);
     // 3 sku (Uuid -> string). Ajuste toString() se seu Uuid usa outro nome.
-    const std::string skuStr = p.getSku().toString();
+    const std::string skuStr = p.getSku().str();
     sqlite3_bind_text(st, 3, skuStr.c_str(), -1, SQLITE_TRANSIENT);
     // 4 price (double -> REAL)
     sqlite3_bind_double(st, 4, p.getPrice());
@@ -72,7 +72,7 @@ Product ProductRepositorySqlite::create(const Product& in) {
 
 std::optional<Product> ProductRepositorySqlite::findById(long long id) {
     const char* sql =
-        "SELECT id,name,description,sku,price,stock,is_active,create_date "
+        "SELECT id,name,description,sku,price,stock_quantity AS stock,is_active,create_date"
         "FROM products WHERE id=?";
 
     sqlite3_stmt* st = nullptr;
@@ -90,7 +90,7 @@ std::optional<Product> ProductRepositorySqlite::findById(long long id) {
 
 std::optional<Product> ProductRepositorySqlite::findBySku(const std::string& sku) {
     const char* sql =
-        "SELECT id,name,description,sku,price,stock,is_active,create_date "
+        "SELECT id,name,description,sku,price,stock_quantity AS stock,is_active,create_date "
         "FROM products WHERE sku=?";
 
     sqlite3_stmt* st = nullptr;
@@ -108,7 +108,7 @@ std::optional<Product> ProductRepositorySqlite::findBySku(const std::string& sku
 
 std::vector<Product> ProductRepositorySqlite::listAll() {
     const char* sql =
-        "SELECT id,name,description,sku,price,stock,is_active,create_date "
+        "SELECT id,name,description,sku,price,stock_quantity AS stock,is_active,create_date "
         "FROM products ORDER BY id DESC";
 
     sqlite3_stmt* st = nullptr;
@@ -124,7 +124,7 @@ std::vector<Product> ProductRepositorySqlite::listAll() {
 
 bool ProductRepositorySqlite::update(const Product& p) {
     const char* sql =
-        "UPDATE products SET name=?, description=?, sku=?, price=?, stock=?, is_active=? "
+        "UPDATE products SET name=?, description=?, sku=?, price=?, stock_quantity=?, is_active=? "
         "WHERE id=?";
 
     sqlite3_stmt* st = nullptr;
@@ -132,7 +132,7 @@ bool ProductRepositorySqlite::update(const Product& p) {
 
     sqlite3_bind_text(st, 1, p.getName().c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(st, 2, p.getDescription().c_str(), -1, SQLITE_TRANSIENT);
-    const std::string skuStr = p.getSku().toString();
+    const std::string skuStr = p.getSku().str();
     sqlite3_bind_text(st, 3, skuStr.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_double(st, 4, p.getPrice());
     sqlite3_bind_int(st, 5, p.getStockQuantity());
@@ -141,6 +141,7 @@ bool ProductRepositorySqlite::update(const Product& p) {
 
     sqlite_check(sqlite3_step(st), connection_.raw(), "step update product");
     const int changed = sqlite3_changes(connection_.raw());
+
     sqlite3_finalize(st);
     return changed > 0;
 }

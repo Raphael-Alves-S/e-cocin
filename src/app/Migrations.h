@@ -33,16 +33,17 @@ CREATE TABLE IF NOT EXISTS products (
   id              INTEGER PRIMARY KEY AUTOINCREMENT,
   name            TEXT    NOT NULL,
   description     TEXT,
-  sku             TEXT    NOT NULL UNIQUE,   -- UUID como string
-  price           REAL    NOT NULL,          -- atenção a arredondamento; considerar INTEGER (centavos)
+  sku             TEXT    NOT NULL UNIQUE,   
+  price           REAL    NOT NULL,       
   stock_quantity  INTEGER NOT NULL DEFAULT 0,
   is_active       INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0,1)),
-  create_date     INTEGER NOT NULL           -- epoch seconds
+  create_date     INTEGER NOT NULL  
 );
 
 -- Índices auxiliares
 CREATE INDEX IF NOT EXISTS idx_products_name       ON products(name);
 CREATE INDEX IF NOT EXISTS idx_products_is_active  ON products(is_active);
+
 
 -- ===========================
 -- Tabela: addresses 

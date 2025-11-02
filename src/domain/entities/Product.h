@@ -2,8 +2,8 @@
 #define PRODUCT_H
 
 #include <string>
-#include "core/Time.h"
-#include "core/Uuid.h"
+#include "../core/Time.h"
+#include "../core/Uuid.h"
 
 class Product {
 private:
