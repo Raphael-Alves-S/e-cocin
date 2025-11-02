@@ -1,47 +1,102 @@
 #include "ProductRepositorySqlite.h"
-#include "core/Uuid.h"
 #include "Helpers.h"
+#include <chrono>
 
-using namespace ecocin;
-using infra::repositories::sqlite::ProductRepositorySqlite;
-
+// Converte uma linha de SELECT em Product
 static Product row_to_product(sqlite3_stmt* s) {
-    Product product;
-    product.setId(static_cast<long long>(sqlite3_column_int64(s, 0)));
-    product.setName(reinterpret_cast<const char*>(sqlite3_column_text(s, 1)));
-    if (sqlite3_column_type(s, 2) != SQLITE_NULL)
-        product.setDescription(std::string(reinterpret_cast<const char*>(sqlite3_column_text(s, 2))));
-    product.setSku(ecocin::core::Uuid(reinterpret_cast<const char*>(sqlite3_column_text(s, 3))));
-    product.setPrice(sqlite3_column_int64(s, 4));
-    product.setStockQuantity(static_cast<int>(sqlite3_column_int(s, 5)));
-    product.setIsActive(static_cast<bool>(sqlite3_column_int(s, 6)));
-    product.setCreateDate(std::chrono::system_clock::time_point{std::chrono::seconds{sqlite3_column_int64(s, 7)}});
-    return product;
+    Product p;
+    p.setId(static_cast<long long>(sqlite3_column_int64(s, 0)));
+    p.setName(reinterpret_cast<const char*>(sqlite3_column_text(s, 1)));
+
+    if (sqlite3_column_type(s, 2) != SQLITE_NULL) {
+        p.setDescription(std::string(reinterpret_cast<const char*>(sqlite3_column_text(s, 2))));
+    } else {
+        p.setDescription(std::string{});
+    }
+
+    // sku TEXT -> Uuid via ctor(const char*)
+    p.setSku(ecocin::core::Uuid(reinterpret_cast<const char*>(sqlite3_column_text(s, 3))));
+
+    // price REAL
+    p.setPrice(sqlite3_column_double(s, 4));
+    // stock INTEGER
+    p.setStockQuantity(static_cast<int>(sqlite3_column_int(s, 5)));
+    // is_active INTEGER (0/1)
+    p.setIsActive(sqlite3_column_int(s, 6) != 0);
+    // create_date INTEGER (epoch seconds)
+    p.setCreateDate(std::chrono::system_clock::time_point{
+        std::chrono::seconds{sqlite3_column_int64(s, 7)}
+    });
+    return p;
 }
+
+namespace ecocin::infra::repositories::sqlite {
 
 Product ProductRepositorySqlite::create(const Product& in) {
     Product p = in;
-    const char* sql = "INSERT INTO products(name,description,price_cents,status) VALUES(?,?,?,?)";
+
+    // define create_date agora (epoch seconds)
+    const auto now   = std::chrono::system_clock::now();
+    const auto epoch = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
+    p.setCreateDate(now);
+
+    const char* sql =
+        "INSERT INTO products(name, description, sku, price, stock, is_active, create_date) "
+        "VALUES(?,?,?,?,?,?,?)";
+
     sqlite3_stmt* st = nullptr;
-    sqlite_check(sqlite3_prepare_v2(cx_.raw(), sql, -1, &st, nullptr), cx_.raw(), "prepare insert product");
+    sqlite_check(sqlite3_prepare_v2(connection_.raw(), sql, -1, &st, nullptr), connection_.raw(), "prepare insert product");
+
+    // 1 name
     sqlite3_bind_text(st, 1, p.getName().c_str(), -1, SQLITE_TRANSIENT);
-    if (p.getDescription().has_value())
-        sqlite3_bind_text(st, 2, p.getDescription()->c_str(), -1, SQLITE_TRANSIENT);
-    else
-        sqlite3_bind_null(st, 2);
-    sqlite3_bind_int64(st, 3, p.getPriceCents());
-    sqlite3_bind_text(st, 4, p.getStatus().c_str(), -1, SQLITE_TRANSIENT);
-    sqlite_check(sqlite3_step(st), cx_.raw(), "step insert product");
+    // 2 description (string; pode ser vazia)
+    sqlite3_bind_text(st, 2, p.getDescription().c_str(), -1, SQLITE_TRANSIENT);
+    // 3 sku (Uuid -> string). Ajuste toString() se seu Uuid usa outro nome.
+    const std::string skuStr = p.getSku().toString();
+    sqlite3_bind_text(st, 3, skuStr.c_str(), -1, SQLITE_TRANSIENT);
+    // 4 price (double -> REAL)
+    sqlite3_bind_double(st, 4, p.getPrice());
+    // 5 stock (int)
+    sqlite3_bind_int(st, 5, p.getStockQuantity());
+    // 6 is_active (bool -> 0/1)
+    sqlite3_bind_int(st, 6, p.getIsActive() ? 1 : 0);
+    // 7 create_date (epoch)
+    sqlite3_bind_int64(st, 7, static_cast<sqlite3_int64>(epoch));
+
+    sqlite_check(sqlite3_step(st), connection_.raw(), "step insert product");
     sqlite3_finalize(st);
-    p.setId(static_cast<long long>(sqlite3_last_insert_rowid(cx_.raw())));
+
+    p.setId(static_cast<long long>(sqlite3_last_insert_rowid(connection_.raw())));
     return p;
 }
 
 std::optional<Product> ProductRepositorySqlite::findById(long long id) {
-    const char* sql = "SELECT id,name,description,price_cents,status FROM products WHERE id=?";
+    const char* sql =
+        "SELECT id,name,description,sku,price,stock,is_active,create_date "
+        "FROM products WHERE id=?";
+
     sqlite3_stmt* st = nullptr;
-    sqlite_check(sqlite3_prepare_v2(cx_.raw(), sql, -1, &st, nullptr), cx_.raw(), "prepare get product");
+    sqlite_check(sqlite3_prepare_v2(connection_.raw(), sql, -1, &st, nullptr), connection_.raw(), "prepare get product by id");
     sqlite3_bind_int64(st, 1, id);
+
+    if (sqlite3_step(st) == SQLITE_ROW) {
+        auto p = row_to_product(st);
+        sqlite3_finalize(st);
+        return p;
+    }
+    sqlite3_finalize(st);
+    return std::nullopt;
+}
+
+std::optional<Product> ProductRepositorySqlite::findBySku(const std::string& sku) {
+    const char* sql =
+        "SELECT id,name,description,sku,price,stock,is_active,create_date "
+        "FROM products WHERE sku=?";
+
+    sqlite3_stmt* st = nullptr;
+    sqlite_check(sqlite3_prepare_v2(connection_.raw(), sql, -1, &st, nullptr), connection_.raw(), "prepare get product by sku");
+    sqlite3_bind_text(st, 1, sku.c_str(), -1, SQLITE_TRANSIENT);
+
     if (sqlite3_step(st) == SQLITE_ROW) {
         auto p = row_to_product(st);
         sqlite3_finalize(st);
@@ -52,29 +107,40 @@ std::optional<Product> ProductRepositorySqlite::findById(long long id) {
 }
 
 std::vector<Product> ProductRepositorySqlite::listAll() {
-    const char* sql = "SELECT id,name,description,price_cents,status FROM products ORDER BY id DESC";
+    const char* sql =
+        "SELECT id,name,description,sku,price,stock,is_active,create_date "
+        "FROM products ORDER BY id DESC";
+
     sqlite3_stmt* st = nullptr;
-    sqlite_check(sqlite3_prepare_v2(cx_.raw(), sql, -1, &st, nullptr), cx_.raw(), "prepare list products");
+    sqlite_check(sqlite3_prepare_v2(connection_.raw(), sql, -1, &st, nullptr), connection_.raw(), "prepare list products");
+
     std::vector<Product> out;
-    while (sqlite3_step(st) == SQLITE_ROW) out.push_back(row_to_product(st));
+    while (sqlite3_step(st) == SQLITE_ROW) {
+        out.push_back(row_to_product(st));
+    }
     sqlite3_finalize(st);
     return out;
 }
 
 bool ProductRepositorySqlite::update(const Product& p) {
-    const char* sql = "UPDATE products SET name=?, description=?, price_cents=?, status=? WHERE id=?";
+    const char* sql =
+        "UPDATE products SET name=?, description=?, sku=?, price=?, stock=?, is_active=? "
+        "WHERE id=?";
+
     sqlite3_stmt* st = nullptr;
-    sqlite_check(sqlite3_prepare_v2(cx_.raw(), sql, -1, &st, nullptr), cx_.raw(), "prepare update product");
+    sqlite_check(sqlite3_prepare_v2(connection_.raw(), sql, -1, &st, nullptr), connection_.raw(), "prepare update product");
+
     sqlite3_bind_text(st, 1, p.getName().c_str(), -1, SQLITE_TRANSIENT);
-    if (p.getDescription().has_value())
-        sqlite3_bind_text(st, 2, p.getDescription()->c_str(), -1, SQLITE_TRANSIENT);
-    else
-        sqlite3_bind_null(st, 2);
-    sqlite3_bind_int64(st, 3, p.getPriceCents());
-    sqlite3_bind_text(st, 4, p.getStatus().c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_int64(st, 5, p.getId());
-    sqlite_check(sqlite3_step(st), cx_.raw(), "step update product");
-    int changed = sqlite3_changes(cx_.raw());
+    sqlite3_bind_text(st, 2, p.getDescription().c_str(), -1, SQLITE_TRANSIENT);
+    const std::string skuStr = p.getSku().toString();
+    sqlite3_bind_text(st, 3, skuStr.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_double(st, 4, p.getPrice());
+    sqlite3_bind_int(st, 5, p.getStockQuantity());
+    sqlite3_bind_int(st, 6, p.getIsActive() ? 1 : 0);
+    sqlite3_bind_int64(st, 7, p.getId());
+
+    sqlite_check(sqlite3_step(st), connection_.raw(), "step update product");
+    const int changed = sqlite3_changes(connection_.raw());
     sqlite3_finalize(st);
     return changed > 0;
 }
@@ -82,10 +148,12 @@ bool ProductRepositorySqlite::update(const Product& p) {
 bool ProductRepositorySqlite::remove(long long id) {
     const char* sql = "DELETE FROM products WHERE id=?";
     sqlite3_stmt* st = nullptr;
-    sqlite_check(sqlite3_prepare_v2(cx_.raw(), sql, -1, &st, nullptr), cx_.raw(), "prepare delete product");
+    sqlite_check(sqlite3_prepare_v2(connection_.raw(), sql, -1, &st, nullptr), connection_.raw(), "prepare delete product");
     sqlite3_bind_int64(st, 1, id);
-    sqlite_check(sqlite3_step(st), cx_.raw(), "step delete product");
-    int changed = sqlite3_changes(cx_.raw());
+    sqlite_check(sqlite3_step(st), connection_.raw(), "step delete product");
+    const int changed = sqlite3_changes(connection_.raw());
     sqlite3_finalize(st);
     return changed > 0;
 }
+
+} // namespace ecocin::infra::repositories::sqlite

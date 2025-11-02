@@ -13,6 +13,7 @@ public:
 
     virtual Product create(const Product& in) = 0;
     virtual std::optional<Product> findById(long long id) = 0;
+    virtual std::optional<Product> findBySku(const std::string& sku) = 0;
     virtual std::vector<Product> listAll() = 0;
     virtual bool update(const Product& p) = 0;
     virtual bool remove(long long id) = 0;
