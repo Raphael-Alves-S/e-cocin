@@ -46,6 +46,13 @@ ENDPOINT("GET", "/clients/{cpf}", getClient,
     return createResponse(Status::CODE_404, "Client not found");
   }
 
+  ENDPOINT("GET", "/clients/{id}", getClientById,
+           PATH(Int64, id)) {
+    auto c = clientService->getClientById(id);
+    if (!c) {
+      return createResponse(Status::CODE_404, "Client not found");
+    }
+
   // monta DTO de saída
   auto dto = ClientOutDto::createShared();
   dto->id    = c->getId();

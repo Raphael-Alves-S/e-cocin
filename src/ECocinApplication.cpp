@@ -19,19 +19,27 @@
 #include "infra/repositories/sqlite/ProductRepositorySqlite.h"
 #include "services/ProductService.h"
 
+#include "controllers/AddressController.h"
+#include "infra/repositories/sqlite/AddressRepositorySqlite.h"
+#include "services/AddressService.h"
+
 
 int main() {
   // Migrations
   ecocin::infra::db::SqliteConnection cx{"e-cocin.db"};
   ecocin::app::runMigrations(cx.raw());
 
-  // Repo + Service
+  // Client Repo + Service
   auto clientRepo    = std::make_shared<ecocin::infra::repositories::sqlite::ClientRepositorySqlite>(cx);
   auto clientService = std::make_shared<ecocin::services::ClientService>(*clientRepo);
 
   // Product Repo + Service
   auto productRepo    = std::make_shared<ecocin::infra::repositories::sqlite::ProductRepositorySqlite>(cx);
   auto productService = std::make_shared<ecocin::services::ProductService>(*productRepo);
+
+  // Adress Repo + Service
+  auto addressRepo    = std::make_shared<ecocin::infra::repositories::sqlite::AddressRepositorySqlite>(cx);
+  auto addressService = std::make_shared<ecocin::services::AddressService>(*addressRepo, *clientRepo);
 
   // OATPP
   oatpp::Environment::init();
@@ -44,6 +52,9 @@ int main() {
 
   auto productController = std::make_shared<ProductController>(objectMapper, productService);
   router->addController(productController);
+
+  auto addressController = std::make_shared<AddressController>(objectMapper, addressService);
+  router->addController(addressController);
 
   auto connectionHandler = oatpp::web::server::HttpConnectionHandler::createShared(router);
   auto provider = oatpp::network::tcp::server::ConnectionProvider::createShared(

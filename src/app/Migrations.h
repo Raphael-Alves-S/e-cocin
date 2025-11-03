@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS addresses (
   state           TEXT    NOT NULL,
   zip             TEXT    NOT NULL,
   address_type    TEXT    NOT NULL,
-  create_date      INTEGER NOT NULL,           -- epoch seconds
+  create_date     INTEGER NOT NULL,           
 
 
   FOREIGN KEY (client_id) REFERENCES clients(id)

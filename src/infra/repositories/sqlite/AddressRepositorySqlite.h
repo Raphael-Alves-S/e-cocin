@@ -1,12 +1,12 @@
 #ifndef ECOCIN_INFRA_REPOSITORIES_SQLITE_ADDRESSREPOSITORYSQLITE_H
 #define ECOCIN_INFRA_REPOSITORIES_SQLITE_ADDRESSREPOSITORYSQLITE_H
 
-#include "../../domain/repositories/IAddressRepository.h"
-#include "../../db/SqliteConnection.h"
+#include "domain/repositories/IAddressRepository.h"
+#include "infra/db/SqliteConnection.h"
 
 namespace ecocin::infra::repositories::sqlite {
 
-class AddressRepositorySqlite : public IAddressRepository {
+class AddressRepositorySqlite : public ecocin::domain::repositories::IAddressRepository {
 private:
     ecocin::infra::db::SqliteConnection& connection_;
 public:
@@ -17,6 +17,7 @@ public:
     std::vector<Address> listAll() override;
     bool update(const Address& addr) override;
     bool remove(long long id) override;
+    std::vector<Address> listByClientId(long long clientId) override;
 };
 }
-#endif // ECOCIN_INFRA_REPOSITORIES_SQLITE_ADDRESSREPOSITORYSQLITE_H
+#endif

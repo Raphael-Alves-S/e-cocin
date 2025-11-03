@@ -2,7 +2,6 @@
 #include "Helpers.h"
 #include <chrono>
 
-// Converte uma linha de SELECT em Product
 static Product row_to_product(sqlite3_stmt* s) {
     Product p;
     p.setId(static_cast<long long>(sqlite3_column_int64(s, 0)));
@@ -14,16 +13,14 @@ static Product row_to_product(sqlite3_stmt* s) {
         p.setDescription(std::string{});
     }
 
-    // sku TEXT -> Uuid via ctor(const char*)
+
     p.setSku(ecocin::core::Uuid(reinterpret_cast<const char*>(sqlite3_column_text(s, 3))));
 
-    // price REAL
+
     p.setPrice(sqlite3_column_double(s, 4));
-    // stock INTEGER
+
     p.setStockQuantity(static_cast<int>(sqlite3_column_int(s, 5)));
-    // is_active INTEGER (0/1)
     p.setIsActive(sqlite3_column_int(s, 6) != 0);
-    // create_date INTEGER (epoch seconds)
     p.setCreateDate(std::chrono::system_clock::time_point{
         std::chrono::seconds{sqlite3_column_int64(s, 7)}
     });
@@ -34,8 +31,6 @@ namespace ecocin::infra::repositories::sqlite {
 
 Product ProductRepositorySqlite::create(const Product& in) {
     Product p = in;
-
-    // define create_date agora (epoch seconds)
     const auto now   = std::chrono::system_clock::now();
     const auto epoch = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
     p.setCreateDate(now);
@@ -47,20 +42,13 @@ Product ProductRepositorySqlite::create(const Product& in) {
     sqlite3_stmt* st = nullptr;
     sqlite_check(sqlite3_prepare_v2(connection_.raw(), sql, -1, &st, nullptr), connection_.raw(), "prepare insert product");
 
-    // 1 name
     sqlite3_bind_text(st, 1, p.getName().c_str(), -1, SQLITE_TRANSIENT);
-    // 2 description (string; pode ser vazia)
     sqlite3_bind_text(st, 2, p.getDescription().c_str(), -1, SQLITE_TRANSIENT);
-    // 3 sku (Uuid -> string). Ajuste toString() se seu Uuid usa outro nome.
     const std::string skuStr = p.getSku().str();
     sqlite3_bind_text(st, 3, skuStr.c_str(), -1, SQLITE_TRANSIENT);
-    // 4 price (double -> REAL)
     sqlite3_bind_double(st, 4, p.getPrice());
-    // 5 stock (int)
     sqlite3_bind_int(st, 5, p.getStockQuantity());
-    // 6 is_active (bool -> 0/1)
     sqlite3_bind_int(st, 6, p.getIsActive() ? 1 : 0);
-    // 7 create_date (epoch)
     sqlite3_bind_int64(st, 7, static_cast<sqlite3_int64>(epoch));
 
     sqlite_check(sqlite3_step(st), connection_.raw(), "step insert product");
@@ -157,4 +145,4 @@ bool ProductRepositorySqlite::remove(long long id) {
     return changed > 0;
 }
 
-} // namespace ecocin::infra::repositories::sqlite
+}

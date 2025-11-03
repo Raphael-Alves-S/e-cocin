@@ -19,6 +19,10 @@ namespace ecocin::services {
         return clientRepo_.findByCpf(cpf);
     }
 
+    std::optional<Client> ClientService::getClientById(int64_t id) {
+        return clientRepo_.findById(id);
+    }
+
     bool ClientService::clientExists(const std::string& cpf) {
         return clientRepo_.findByCpf(cpf).has_value();
     }
