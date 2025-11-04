@@ -248,10 +248,6 @@ Embora não sejam fundamentos diretos da OOP, acoplamento e coesão são princí
 *   **Baixo Acoplamento**: O uso de interfaces e injeção de dependência resulta em baixo acoplamento. As camadas (Controlador, Serviço, Repositório) são independentes umas das outras, dependendo apenas de contratos (interfaces) e não de implementações concretas. Isso facilita a manutenção e a testabilidade.
 *   **Alta Coesão**: Cada classe e módulo no e-cocin tem uma responsabilidade bem definida. Por exemplo, as entidades (`Client`, `Product`) são responsáveis por representar os dados do domínio, os repositórios (`ClientRepositorySqlite`) são responsáveis pela persistência, e os serviços (`ClientService`) pela lógica de negócio. Isso aumenta a coesão do código.
 
-## Conclusão
-
-O sistema e-cocin é um exemplo claro de uma aplicação bem estruturada que aplica os princípios da Orientação a Objetos para criar um código modular, extensível e de fácil manutenção. O uso de encapsulamento, construtores, herança (via interfaces) e polimorfismo, juntamente com a injeção de dependência, contribui para uma arquitetura robusta e flexível.
-
 ---
 
 ## 3. Uso de Ponteiros Inteligentes e `std::optional`
@@ -316,3 +312,7 @@ std::optional<Client> ClientService::getClientByCpf(const std::string& cpf) {
     return clientRepository_.findByCpf(cpf);
 }
 ```
+
+## Conclusão
+
+O sistema e-cocin é um exemplo claro de uma aplicação bem estruturada que aplica os princípios da Orientação a Objetos para criar um código modular, extensível e de fácil manutenção. O uso de encapsulamento, construtores, herança (via interfaces) e polimorfismo, juntamente com a injeção de dependência e o uso moderno de ponteiros inteligentes e `std::optional`, contribui para uma arquitetura robusta, segura e flexível.
