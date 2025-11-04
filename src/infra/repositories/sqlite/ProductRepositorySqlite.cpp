@@ -2,6 +2,7 @@
 #include "Helpers.h"
 #include <chrono>
 
+// Função auxiliar para converter uma linha do resultado da consulta SQL em um objeto Product.
 static Product row_to_product(sqlite3_stmt* s) {
     Product p;
     p.setId(static_cast<long long>(sqlite3_column_int64(s, 0)));

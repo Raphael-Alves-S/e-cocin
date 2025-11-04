@@ -4,6 +4,7 @@
 #include "domain/repositories/IProductRepository.h"
 #include "infra/db/SqliteConnection.h"
 
+// Implementação do repositório de produtos usando SQLite
 namespace ecocin::infra::repositories::sqlite {
 
 class ProductRepositorySqlite : public ecocin::domain::repositories::IProductRepository {

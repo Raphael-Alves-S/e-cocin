@@ -7,9 +7,10 @@
 
 namespace ecocin::domain::repositories {
 
+// Interface para Product Repository
 class IProductRepository {
 public:
-    virtual ~IProductRepository() = default;
+    virtual ~IProductRepository() = default; // Destrutor virtual padrão
 
     virtual Product create(const Product& in) = 0;
     virtual std::optional<Product> findById(long long id) = 0;

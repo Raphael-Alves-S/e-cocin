@@ -4,7 +4,7 @@
 #include <chrono>
 
 // Definição de tipo para representar timestamps (datas/horas)
-// Usa std::chrono::system_clock::time_point para precisão e portabilidade.
+// Usa std::chrono::system_clock::time_point para precisão e portabilidade
 
 namespace ecocin::core {
 

@@ -10,6 +10,7 @@
 
 namespace ecocin::services {
 
+// Classe de serviço para gerenciar operações relacionadas a clientes
 class ClientService {
 public:
     explicit ClientService(ecocin::infra::repositories::sqlite::ClientRepositorySqlite& clientRepo);

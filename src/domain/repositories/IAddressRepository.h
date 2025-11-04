@@ -6,9 +6,10 @@
 
 namespace ecocin::domain::repositories {
 
+// Interface para Address Repository
 class IAddressRepository {
 public:
-    virtual ~IAddressRepository() = default;
+    virtual ~IAddressRepository() = default; // Destrutor virtual padrão
 
     virtual Address create(const Address& in) = 0;
     virtual std::optional<Address> findById(long long id) = 0;

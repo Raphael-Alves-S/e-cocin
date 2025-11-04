@@ -3,14 +3,14 @@
 #include <cctype>
 #include <chrono>
 
-// --- Helpers internos ---
+// Helpers internos 
 static inline std::string trim_copy(std::string s){
     auto not_space = [](unsigned char ch){ return !std::isspace(ch); };
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), not_space));
     s.erase(std::find_if(s.rbegin(), s.rend(), not_space).base(), s.end());
     return s;
 }
-
+// Construtores
 Client::Client()
     : createDate_(std::chrono::system_clock::now()) {}
 Client::Client(const std::string& name,
