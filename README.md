@@ -40,7 +40,8 @@ Este guia explica **exatamente** como reproduzir o ambiente que usamos:
 > ├─ .vscode/
 > ├─ build/
 > ├─ cmake/
-> │  └─ third_party.cmake
+> ├─ resources/
+> │  └─ ECOMMERCE-CIN.postman_collection.json
 > ├─ src/
 > │  ├─ app/
 > │  ├─ controllers/
@@ -217,7 +218,16 @@ Tudo certo 🎉
 
 ---
 
-## 11) Rotas da API
+## 11) Testando com Postman
+
+Para facilitar os testes da API, uma coleção do Postman está disponível no diretório `resources/`.
+
+1.  **Importe a Coleção**: Abra o Postman e importe o arquivo `ECOMMERCE-CIN.postman_collection.json`.
+2.  **Execute as Requisições**: A coleção contém exemplos de requisições para todas as rotas da API, com exemplos de corpos (body) para as requisições `POST` e `PUT`.
+
+---
+
+## 12) Rotas da API
 
 A seguir, a lista de rotas disponíveis na API.
 
