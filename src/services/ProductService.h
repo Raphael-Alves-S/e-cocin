@@ -10,6 +10,7 @@
 
 namespace ecocin::services {
 
+// Classe de serviço para gerenciar operações relacionadas a produtos
 class ProductService {
 public:
   explicit ProductService(ecocin::infra::repositories::sqlite::ProductRepositorySqlite& productRepo);

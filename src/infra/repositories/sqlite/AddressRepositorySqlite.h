@@ -6,9 +6,10 @@
 
 namespace ecocin::infra::repositories::sqlite {
 
+// Implementação do repositório de endereços usando SQLite
 class AddressRepositorySqlite : public ecocin::domain::repositories::IAddressRepository {
 private:
-    ecocin::infra::db::SqliteConnection& connection_;
+    ecocin::infra::db::SqliteConnection& connection_; 
 public:
     explicit AddressRepositorySqlite(ecocin::infra::db::SqliteConnection& connection) : connection_(connection) {}
 

@@ -6,6 +6,7 @@
 
 namespace ecocin::infra::repositories::sqlite {
 
+// Implementação do repositório de clientes usando SQLite
 class ClientRepositorySqlite : public ecocin::domain::repositories::IClientRepository {
 private:
     ecocin::infra::db::SqliteConnection& connection_;

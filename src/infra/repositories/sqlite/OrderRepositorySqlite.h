@@ -8,6 +8,7 @@
 
 namespace ecocin::infra::repositories::sqlite {
 
+// Implementação do repositório de Orders usando SQLite
 class OrderRepositorySqlite : public ecocin::domain::repositories::IOrderRepository {
 private:
     ecocin::infra::db::SqliteConnection& connection_;

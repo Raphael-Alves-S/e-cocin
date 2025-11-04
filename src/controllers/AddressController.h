@@ -13,7 +13,7 @@
 
 // O AddressController é a porta de entrada para as requisições HTTP relacionadas a endereços.
 // Ele herda de ApiController do framework OATPP, que gerencia o roteamento e a serialização/desserialização de dados.
-// Esta classe demonstra o padrão de projeto MVC (Model-View-Controller), onde o Controller
+// Essa classe demonstra o padrão de projeto MVC (Model-View-Controller), onde o Controller
 // recebe a entrada do usuário (requisição HTTP), interage com o Model (através da camada de Serviço)
 // e retorna uma View (a resposta HTTP, geralmente em JSON).
 class AddressController : public oatpp::web::server::api::ApiController {

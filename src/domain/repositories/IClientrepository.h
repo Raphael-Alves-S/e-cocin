@@ -8,9 +8,10 @@
 
 namespace ecocin::domain::repositories {
 
+// Interface para Client Repository
 class IClientRepository {
 public:
-    virtual ~IClientRepository() = default;
+    virtual ~IClientRepository() = default; // Destrutor virtual padrão
 
     virtual Client create(const Client& in) = 0;
     virtual std::optional<Client> findById(long long id) = 0;

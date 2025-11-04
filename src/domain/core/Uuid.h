@@ -7,7 +7,8 @@
 #include <iomanip>
 
 // Classe utilitária para geração e manipulação de UUID v4
-// Mantida inline, pois é leve e não requer .cpp adicional.
+// Serve para identificar entidades de forma única no sistema
+// Mantida inline, pois é leve e não requer .cpp adicional
 
 namespace ecocin::core {
 

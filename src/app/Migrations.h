@@ -1,3 +1,6 @@
+// Função para rodar migrações de banco de dados SQLite
+// Cria tabelas e índices necessários se não existirem
+
 #ifndef ECOCIN_APP_MIGRATIONS_H
 #define ECOCIN_APP_MIGRATIONS_H
 
@@ -91,8 +94,6 @@ CREATE INDEX IF NOT EXISTS idx_orders_status      ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_create_date ON orders(create_date);
 
 )SQL";
-
-
 
 // Executa o SQL acima (lança std::runtime_error em caso de falha)
 inline void runMigrations(sqlite3* db) {

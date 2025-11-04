@@ -1,6 +1,7 @@
 #include "Product.h"
 #include <chrono>
 
+// Construtores
 Product::Product()
     : createDate_(std::chrono::system_clock::now()) {}
 Product::Product(const std::string& name,

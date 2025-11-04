@@ -8,7 +8,7 @@
 #include "../infra/repositories/sqlite/AddressRepositorySqlite.h" 
 #include "../infra/repositories/sqlite/ClientRepositorySqlite.h"
 
-
+// Classe de serviço para gerenciar operações relacionadas a endereços
 namespace ecocin::services {
     class AddressService {
     public:

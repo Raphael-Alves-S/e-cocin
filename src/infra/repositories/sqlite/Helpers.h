@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <string>
 
+// Função auxiliar para verificar erros do SQLite
 inline void sqlite_check(int rc, sqlite3* db, const char* where) {
     if (rc != SQLITE_OK && rc != SQLITE_ROW && rc != SQLITE_DONE) {
         throw std::runtime_error(std::string("SQLite error @ ") + where + ": " + sqlite3_errmsg(db));
