@@ -28,12 +28,22 @@
 #include "services/OrderService.h"
 
 
+// A função `main` é o ponto de entrada da aplicação. Ela é responsável por
+// inicializar todos os componentes da arquitetura e iniciar o servidor web.
+// Este processo é conhecido como "Composição da Raiz" (Composition Root),
+// um padrão onde todas as dependências são construídas e injetadas em um único local.
 int main() {
-  // Migrations
+  // O primeiro passo é configurar o banco de dados.
+  // Uma conexão com o SQLite é estabelecida e as migrações (criação/atualização de tabelas)
+  // são executadas para garantir que o esquema do banco esteja atualizado.
   ecocin::infra::db::SqliteConnection cx{"e-cocin.db"};
   ecocin::app::runMigrations(cx.raw());
 
-  // Client Repo + Service
+  // Aqui começa a injeção de dependência manual.
+  // Para cada entidade (Cliente, Produto, etc.), o padrão é o mesmo:
+  // 1. Cria-se uma instância do Repositório, passando a conexão com o banco.
+  // 2. Cria-se uma instância do Serviço, passando o repositório como dependência.
+  // Este processo constrói a cadeia de dependências de baixo para cima (dados -> negócio).
   auto clientRepo    = std::make_shared<ecocin::infra::repositories::sqlite::ClientRepositorySqlite>(cx);
   auto clientService = std::make_shared<ecocin::services::ClientService>(*clientRepo);
 
@@ -50,12 +60,19 @@ int main() {
   auto orderService = std::make_shared<ecocin::services::OrderService>(
       *orderRepo, *clientRepo, *productRepo, *addressRepo);
 
-  // OATPP
+  // Com os serviços prontos, a próxima etapa é configurar a camada web usando o framework OATPP.
   oatpp::Environment::init();
 
+  // O ObjectMapper é responsável por converter objetos C++ para JSON e vice-versa.
+  // O HttpRouter gerencia o mapeamento das rotas (ex: "/clients") para os métodos dos controllers.
   auto objectMapper = std::make_shared<oatpp::json::ObjectMapper>();
   auto router       = oatpp::web::server::HttpRouter::createShared();
 
+  // Agora, a injeção de dependência continua na camada de apresentação:
+  // 1. Cria-se uma instância de cada Controller.
+  // 2. O Controller recebe o ObjectMapper (para manipulação de JSON) e o Serviço correspondente.
+  // 3. O Controller é registrado no roteador, associando seus endpoints (ex: GET /clients)
+  //    às funções que irão tratar as requisições.
   auto controller = std::make_shared<ClientController>(objectMapper, clientService);
   router->addController(controller);
 
@@ -68,14 +85,23 @@ int main() {
   auto orderController = std::make_shared<OrderController>(objectMapper, orderService);
   router->addController(orderController);
 
+  // Com todas as rotas e controllers configurados no roteador,
+  // os componentes finais do servidor são montados.
   auto connectionHandler = oatpp::web::server::HttpConnectionHandler::createShared(router);
   auto provider = oatpp::network::tcp::server::ConnectionProvider::createShared(
-      {"0.0.0.0", 8000, oatpp::network::Address::IP_4});
+      {"0.0.0.0", 8000, oatpp::network::Address::IP_4}); // Escuta em todas as interfaces na porta 8000.
 
+  // O objeto 'Server' é criado, unindo o provedor de conexão (que aceita conexões TCP)
+  // com o manipulador de conexões (que processa as requisições HTTP através do roteador).
   oatpp::network::Server server(provider, connectionHandler);
   std::cout << "🚀 API rodando em http://localhost:8000\n";
+
+  // O método 'run()' inicia o loop do servidor, que fica aguardando e processando requisições.
+  // Este é um processo bloqueante que mantém a aplicação viva.
   server.run();
 
+  // Após o término do servidor (ex: com um sinal de interrupção),
+  // o ambiente do OATPP é finalizado para liberar recursos.
   oatpp::Environment::destroy();
   return 0;
 }
