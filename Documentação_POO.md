@@ -2,6 +2,10 @@
 
 Este documento descreve o fluxo geral do sistema e-cocin e detalha a aplicação dos fundamentos da Orientação a Objetos (OOP) no código-fonte.
 
+## Diagrama de Classes
+
+<img width="1088" height="1356" alt="E-commerce_cin" src="https://github.com/user-attachments/assets/7cbb1766-a62c-4e0e-ba5e-80fc04ec035f" />
+
 ## 1. Fluxo do Sistema
 
 O sistema e-cocin é uma aplicação web construída com o framework Oat++ para C++. Ele segue uma arquitetura em camadas, com Controladores, Serviços e Repositórios, interagindo com um banco de dados SQLite. A arquitetura é projetada para ser modular e extensível, com uma clara separação de responsabilidades entre as camadas.
@@ -298,7 +302,7 @@ std::optional<Client> ClientService::getClientByCpf(const std::string& cpf) {
 ```
 ## Divisão do Projeto
 
-* Kauã Wallace Silva Melo: responsáve de `controllers` ; relatório e GitHubPages
+* Kauã Wallace Silva Melo: responsável por `controllers` ; relatório e GitHubPages
 
 * KLismman Luan Cabral Silva: responsável por `entities`; apresentação e roteiro do vídeo
 
