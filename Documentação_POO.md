@@ -241,13 +241,6 @@ A abstração foca em mostrar apenas as informações essenciais e esconder os d
 
 *   **Serviços**: A camada de serviço abstrai a lógica de negócio complexa. Por exemplo, o método `createByCpfSkuAndType` no `OrderService` abstrai toda a complexidade de encontrar um cliente por CPF, um produto por SKU, resolver o endereço de entrega e, finalmente, criar um pedido. O controlador que chama este método não precisa saber como essas operações são realizadas.
 
-### 2.6. Acoplamento e Coesão
-
-Embora não sejam fundamentos diretos da OOP, acoplamento e coesão são princípios de design importantes que são influenciados pela aplicação da OOP:
-
-*   **Baixo Acoplamento**: O uso de interfaces e injeção de dependência resulta em baixo acoplamento. As camadas (Controlador, Serviço, Repositório) são independentes umas das outras, dependendo apenas de contratos (interfaces) e não de implementações concretas. Isso facilita a manutenção e a testabilidade.
-*   **Alta Coesão**: Cada classe e módulo no e-cocin tem uma responsabilidade bem definida. Por exemplo, as entidades (`Client`, `Product`) são responsáveis por representar os dados do domínio, os repositórios (`ClientRepositorySqlite`) são responsáveis pela persistência, e os serviços (`ClientService`) pela lógica de negócio. Isso aumenta a coesão do código.
-
 ---
 
 ## 3. Uso de Ponteiros Inteligentes e `std::optional`
@@ -261,11 +254,6 @@ O projeto utiliza ponteiros inteligentes (`std::shared_ptr`) e `std::optional` p
 *   **Onde é usado?**
     *   **`ECocinApplication.cpp`**: Ao criar instâncias de repositórios e serviços, `std::make_shared` é utilizado para alocar esses objetos no heap e encapsulá-los em `std::shared_ptr`.
     *   **Controladores**: Os controladores (e.g., `ClientController`, `OrderController`) recebem e armazenam `std::shared_ptr` para os seus respectivos serviços.
-
-*   **Por que foi escolhido?**
-    *   **Gerenciamento Automático de Memória**: `std::shared_ptr` elimina a necessidade de gerenciar manualmente a memória (com `new` e `delete`), prevenindo vazamentos de memória. O objeto é automaticamente destruído quando a última referência a ele é removida.
-    *   **Propriedade Compartilhada**: Em uma aplicação web, múltiplos componentes (como os controladores) podem precisar acessar o mesmo serviço. `std::shared_ptr` permite que essas dependências sejam compartilhadas de forma segura, garantindo que o objeto de serviço permaneça vivo enquanto for necessário.
-    *   **Integração com o Framework**: O framework Oat++ é projetado para trabalhar com `std::shared_ptr` para gerenciar componentes como controladores e roteadores.
 
 **Exemplo (`ECocinApplication.cpp`):**
 
@@ -288,10 +276,6 @@ auto controller = std::make_shared<ClientController>(objectMapper, clientService
     *   **Retornos de Repositórios**: Métodos como `findById`, `findByCpf`, `findBySku` nos repositórios retornam `std::optional<Entity>`. Se a entidade for encontrada no banco de dados, o `std::optional` conterá o objeto; caso contrário, estará vazio.
     *   **Retornos de Serviços**: Os serviços propagam esse padrão, retornando `std::optional` para os controladores quando uma operação de busca pode não encontrar um resultado.
 
-*   **Por que foi escolhido?**
-    *   **Segurança de Tipo**: `std::optional` é mais seguro que ponteiros nulos (`nullptr`). Ele força o desenvolvedor a verificar se um valor está presente antes de acessá-lo, evitando erros de desreferência de ponteiro nulo em tempo de execução.
-    *   **Clareza e Expressividade**: O uso de `std::optional` no tipo de retorno de uma função deixa claro para quem a chama que o valor pode não existir. Isso melhora a legibilidade e a manutenibilidade do código.
-    *   **Sem Alocação Dinâmica**: Ao contrário de ponteiros, `std::optional` não envolve alocação de memória no heap, o que o torna mais eficiente para representar valores opcionais.
 
 **Exemplo (`src/domain/repositories/IClientRepository.h`):**
 
@@ -312,7 +296,3 @@ std::optional<Client> ClientService::getClientByCpf(const std::string& cpf) {
     return clientRepository_.findByCpf(cpf);
 }
 ```
-
-## Conclusão
-
-O sistema e-cocin é um exemplo claro de uma aplicação bem estruturada que aplica os princípios da Orientação a Objetos para criar um código modular, extensível e de fácil manutenção. O uso de encapsulamento, construtores, herança (via interfaces) e polimorfismo, juntamente com a injeção de dependência e o uso moderno de ponteiros inteligentes e `std::optional`, contribui para uma arquitetura robusta, segura e flexível.
