@@ -52,8 +52,8 @@ Este guia explica **exatamente** como reproduzir o ambiente que usamos:
 > │  └─ test_example.cpp
 > ├─ .gitignore
 > ├─ CMakeLists.txt
-> ├─ documentation.md
-> └─ README-e-cocin.md
+> ├─ Documentação_POO.md
+> └─ README.md
 > ```
 >
 > **Não** comite a pasta `build/`.
