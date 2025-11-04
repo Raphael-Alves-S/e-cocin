@@ -58,8 +58,6 @@ Este diagrama ilustra a arquitetura central do domínio do sistema e-cocin, most
     * Um `Address` pode receber zero ou mais `Order` (o cliente pode reutilizar o mesmo endereço para várias compras).
     * Esta ligação é implementada pelo campo `shippingAddressId_` na entidade `Order`, que aponta para o ID do endereço de entrega selecionado. A lógica de negócio para selecionar o endereço correto (ex: pelo `addressType`) é gerida pela camada de serviço.
 
-![Diagrama UML do e-cocin](E-commerce_cin.png)
-
 ---
 
 ## Vídeo de Apresentação
