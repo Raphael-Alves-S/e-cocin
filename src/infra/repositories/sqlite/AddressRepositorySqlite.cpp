@@ -2,8 +2,6 @@
 #include "Helpers.h"
 #include <chrono>
 
-using namespace ecocin;
-using infra::repositories::sqlite::AddressRepositorySqlite;
 
 static Address row_to_address(sqlite3_stmt* s) {
     Address address;
@@ -21,7 +19,7 @@ static Address row_to_address(sqlite3_stmt* s) {
     return address;
 }
 
-Address AddressRepositorySqlite::create(const Address& in) {
+Address ecocin::infra::repositories::sqlite::AddressRepositorySqlite::create(const Address& in) {
     Address address = in;
     const char* sql = "INSERT INTO addresses(client_id,street,number,city,state,zip,address_type,create_date) VALUES(?,?,?,?,?,?,?,?)";
     sqlite3_stmt* st = nullptr;
@@ -42,7 +40,7 @@ Address AddressRepositorySqlite::create(const Address& in) {
     return address;
 }
 
-std::optional<Address> AddressRepositorySqlite::findById(long long id) {
+std::optional<Address> ecocin::infra::repositories::sqlite::AddressRepositorySqlite::findById(long long id) {
     const char* sql = "SELECT id,client_id,street,number,city,state,zip,address_type,create_date FROM addresses WHERE id=?";
     sqlite3_stmt* st = nullptr;
     sqlite_check(sqlite3_prepare_v2(connection_.raw(), sql, -1, &st, nullptr), connection_.raw(), "prepare get address");
@@ -55,7 +53,27 @@ std::optional<Address> AddressRepositorySqlite::findById(long long id) {
     sqlite3_finalize(st);
     return std::nullopt;
 }
-std::vector<Address> AddressRepositorySqlite::listAll() {
+
+
+std::vector<Address> ecocin::infra::repositories::sqlite::AddressRepositorySqlite::listByClientId(long long clientId) {
+    const char* sql =
+        "SELECT id,client_id,street,number,city,state,zip,address_type,create_date "
+        "FROM addresses WHERE client_id=? ORDER BY create_date DESC, id DESC";
+    sqlite3_stmt* st = nullptr;
+    sqlite_check(sqlite3_prepare_v2(connection_.raw(), sql, -1, &st, nullptr),
+                 connection_.raw(), "prepare list addresses by client");
+    sqlite3_bind_int64(st, 1, clientId);
+
+    std::vector<Address> out;
+    while (sqlite3_step(st) == SQLITE_ROW) {
+        out.emplace_back(row_to_address(st));
+    }
+    sqlite3_finalize(st);
+    return out;
+}
+
+
+std::vector<Address> ecocin::infra::repositories::sqlite::AddressRepositorySqlite::listAll() {
     const char* sql = "SELECT id,client_id,street,number,city,state,zip,address_type,create_date FROM addresses ORDER BY id DESC";
     sqlite3_stmt* st = nullptr;
     sqlite_check(sqlite3_prepare_v2(connection_.raw(), sql, -1, &st, nullptr), connection_.raw(), "prepare list addresses");
@@ -65,25 +83,24 @@ std::vector<Address> AddressRepositorySqlite::listAll() {
     return out;
 }   
 
-bool AddressRepositorySqlite::update(const Address& addr) {
-    const char* sql = "UPDATE addresses SET client_id=?, street=?, number=?, city=?, state=?, zip=?, address_type=? WHERE id=?";
+bool ecocin::infra::repositories::sqlite::AddressRepositorySqlite::update(const Address& addr) {
+    const char* sql = "UPDATE addresses SET street=?, number=?, city=?, state=?, zip=?, address_type=? WHERE id=?";
     sqlite3_stmt* st = nullptr;
     sqlite_check(sqlite3_prepare_v2(connection_.raw(), sql, -1, &st, nullptr), connection_.raw(), "prepare update address");
-    sqlite3_bind_int64(st, 1, addr.getClientId());
-    sqlite3_bind_text(st, 2, addr.getStreet().c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(st, 3, addr.getNumber().c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(st, 4, addr.getCity().c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(st, 5, addr.getState().c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(st, 6, addr.getZip().c_str(), -1 , SQLITE_TRANSIENT);
-    sqlite3_bind_text(st, 7, addr.getAddressType().c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_int64(st, 8, addr.getId());
+    sqlite3_bind_text(st, 1, addr.getStreet().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(st, 2, addr.getNumber().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(st, 3, addr.getCity().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(st, 4, addr.getState().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(st, 5, addr.getZip().c_str(), -1 , SQLITE_TRANSIENT);
+    sqlite3_bind_text(st, 6, addr.getAddressType().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int64(st, 7, addr.getId());
     sqlite_check(sqlite3_step(st), connection_.raw(), "step update address");
     int changes = sqlite3_changes(connection_.raw());
     sqlite3_finalize(st);
     return changes > 0;
 }   
 
-bool AddressRepositorySqlite::remove(long long id) {
+bool ecocin::infra::repositories::sqlite::AddressRepositorySqlite::remove(long long id) {
     const char* sql = "DELETE FROM addresses WHERE id=?";
     sqlite3_stmt* st = nullptr;
     sqlite_check(sqlite3_prepare_v2(connection_.raw(), sql, -1, &st, nullptr), connection_.raw(), "prepare delete address");

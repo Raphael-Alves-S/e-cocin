@@ -2,36 +2,35 @@
 #define ADDRESS_H
 
 #include <string>
-#include "core/Uuid.h"
 #include <chrono>
 
 class Address {
 private:
-    long long id_;          // Identificador único do endereço
-    long long client_id_;   // Identificador do cliente ao qual o endereço pertence
-    std::string street_;    // rua
-    std::string number_;    // número
-    std::string city_;      // cidade
-    std::string state_;     // estado
-    std::string zip_;       // CEP
-    std::string addressType_;   // tipo de endereço (residencial, comercial, etc.)
-    std::chrono::system_clock::time_point createDate_;  // data de criação
+    long long id_;         
+    long long client_id_;   // FK do cliente
+    std::string street_;
+    std::string number_;
+    std::string city_;
+    std::string state_;
+    std::string zip_;
+    std::string addressType_;
+    std::chrono::system_clock::time_point createDate_;
 
 public:
-    // Construtores
+    // Construtor padrão (necessário para ORM / deserialização)
     Address();
-    Address(long long client_id,        // Identificador do cliente ao qual o endereço pertence
-            const std::string& street,  // rua
-            const std::string& number,  // número
-            const std::string& city,    // cidade
-            const std::string& state,   // estado
-            const std::string& zip,     // CEP
-            const std::string& addressType,    // tipo de endereço (residencial, comercial, etc.)
-            const std::chrono::system_clock::time_point& createDate);
-            
+
+    // Construtor de domínio
+    Address(const std::string& street,
+            const std::string& number,
+            const std::string& city,
+            const std::string& state,
+            const std::string& zip,
+            const std::string& addressType);
+
     // Getters
-    long long           getId() const { return id_; }
-    long long           getClientId() const { return client_id_; }
+    long long getId() const { return id_; }
+    long long getClientId() const { return client_id_; }
     const std::string& getStreet() const { return street_; }
     const std::string& getNumber() const { return number_; }
     const std::string& getCity() const { return city_; }
@@ -48,8 +47,8 @@ public:
     void setCity(const std::string& city) { city_ = city; }
     void setState(const std::string& state) { state_ = state; }
     void setZip(const std::string& zip) { zip_ = zip; }
-    void setAddressType(const std::string& addressType) { addressType_ = addressType; }
-    void setCreateDate(const std::chrono::system_clock::time_point& createDate) { createDate_ = createDate; }
-
+    void setAddressType(const std::string& type) { addressType_ = type; }
+    void setCreateDate(const std::chrono::system_clock::time_point& date) { createDate_ = date; }
 };
-#endif
+
+#endif // ADDRESS_H

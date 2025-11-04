@@ -1,34 +1,44 @@
 #include "Order.h"
-#include <chrono>  
-#include <numeric>  
+#include <chrono>
+#include <numeric>
 
 Order::Order()
     : id_(0),
       clientId_(0),
-      createDate_(std::chrono::system_clock::now()), 
+      productId_(0),
+      shippingAddressId_(0),
+      quantity_(1),
+      unitPrice_(0.0),
+      totalPrice_(0.0),
       status_("PENDING"),
-      totalPrice_(0.0) {}
+      createDate_(std::chrono::system_clock::now()) {}
 
-Order::Order(long long clientId, const std::string& status)
+Order::Order(long long clientId,
+             long long productId,
+             long long shippingAddressId,
+             int quantity,
+             double unitPrice,
+             const std::string& status)
     : id_(0),
       clientId_(clientId),
-      createDate_(std::chrono::system_clock::now()), 
+      productId_(productId),
+      shippingAddressId_(shippingAddressId),
+      quantity_(quantity),
+      unitPrice_(unitPrice),
+      totalPrice_(quantity * unitPrice),
       status_(status),
-      totalPrice_(0.0) {}
+      createDate_(std::chrono::system_clock::now()) {}
 
-void Order::setItems(const std::vector<OrderItem>& items) {
-    items_ = items;
-    calculateTotalPrice(); 
+void Order::setQuantity(int quantity) {
+    quantity_ = quantity;
+    calculateTotal();
 }
 
-void Order::addItem(const OrderItem& item) {
-    items_.push_back(item);
-    calculateTotalPrice();
+void Order::setUnitPrice(double price) {
+    unitPrice_ = price;
+    calculateTotal();
 }
 
-void Order::calculateTotalPrice() {
-    totalPrice_ = std::accumulate(items_.begin(), items_.end(), 0.0,
-        [](double sum, const OrderItem& item) {
-            return sum + (item.getUnitPrice() * item.getQuantity());
-        });
+void Order::calculateTotal() {
+    totalPrice_ = static_cast<double>(quantity_) * unitPrice_;
 }

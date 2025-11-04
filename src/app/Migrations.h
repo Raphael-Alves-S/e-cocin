@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS addresses (
   state           TEXT    NOT NULL,
   zip             TEXT    NOT NULL,
   address_type    TEXT    NOT NULL,
-  create_date      INTEGER NOT NULL,           -- epoch seconds
+  create_date     INTEGER NOT NULL,           
 
 
   FOREIGN KEY (client_id) REFERENCES clients(id)
@@ -65,7 +65,34 @@ CREATE TABLE IF NOT EXISTS addresses (
 -- Índices auxiliares
 CREATE INDEX IF NOT EXISTS idx_addresses_client_id ON addresses(client_id);
 CREATE INDEX IF NOT EXISTS idx_addresses_zip ON addresses(zip);
+
+-- ===========================
+-- Tabela: orders
+-- ===========================
+CREATE TABLE IF NOT EXISTS orders (
+  id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+  client_id            INTEGER NOT NULL,
+  product_id           INTEGER NOT NULL,
+  shipping_address_id  INTEGER,
+  quantity             INTEGER NOT NULL CHECK (quantity > 0),
+  unit_price           REAL    NOT NULL CHECK (unit_price >= 0.0),
+  total_price          REAL    NOT NULL CHECK (total_price >= 0.0),
+  status               TEXT    NOT NULL DEFAULT 'PENDING',
+  create_date          INTEGER NOT NULL,
+
+  FOREIGN KEY (client_id)           REFERENCES clients(id),
+  FOREIGN KEY (product_id)          REFERENCES products(id),
+  FOREIGN KEY (shipping_address_id) REFERENCES addresses(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_orders_client_id   ON orders(client_id);
+CREATE INDEX IF NOT EXISTS idx_orders_product_id  ON orders(product_id);
+CREATE INDEX IF NOT EXISTS idx_orders_status      ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_create_date ON orders(create_date);
+
 )SQL";
+
+
 
 // Executa o SQL acima (lança std::runtime_error em caso de falha)
 inline void runMigrations(sqlite3* db) {

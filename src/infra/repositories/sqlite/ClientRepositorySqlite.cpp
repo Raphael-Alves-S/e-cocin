@@ -2,7 +2,6 @@
 #include "Helpers.h"
 #include <chrono>
 
-// (opcional) evite using namespace amplo aqui
 
 static Client row_to_client(sqlite3_stmt* s) {
     Client client;
@@ -77,6 +76,7 @@ std::vector<Client> ecocin::infra::repositories::sqlite::ClientRepositorySqlite:
     sqlite3_finalize(st);
     return out;
 }
+
 
 bool ecocin::infra::repositories::sqlite::ClientRepositorySqlite::update(const Client& c) {
     const char* sql = "UPDATE clients SET name=?, email=?, cpf=? WHERE id=?";

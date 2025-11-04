@@ -15,6 +15,7 @@ public:
     explicit ClientService(ecocin::infra::repositories::sqlite::ClientRepositorySqlite& clientRepo);
     std::string createClient(const Client& client);
     std::optional<Client> getClientByCpf(const std::string& cpf);
+    std::optional<Client> getClientById(int64_t id);
     bool clientExists(const std::string& cpf);
     std::vector<Client> listAllClients();
     bool updateClient(const Client& client);

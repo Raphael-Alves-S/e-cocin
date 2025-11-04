@@ -21,6 +21,6 @@ public:
     bool remove(long long id) override;
 };
 
-} // namespace ecocin::infra::repositories::sqlite
+}
 
-#endif // ECOCIN_INFRA_REPOSITORIES_SQLITE_PRODUCTREPOSITORYSQLITE_H
+#endif
