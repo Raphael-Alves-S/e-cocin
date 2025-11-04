@@ -1,0 +1,305 @@
+{
+	"info": {
+		"_postman_id": "09310cb4-48cc-46f8-ad02-31fc09e591bc",
+		"name": "ECOMMERCE-CIN",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9590511"
+	},
+	"item": [
+		{
+			"name": "Create Client",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Maria da Silva\",\r\n  \"email\": \"maria@exemplo.com\",\r\n  \"cpf\": \"07258998547\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/clients",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"clients"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buscar Cliente por CPF",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/clients/cpf/07258998547",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"clients",
+						"cpf",
+						"07258998547"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Clients",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/clients",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"clients"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Products",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Cafeteira X\",\r\n  \"description\": \"Cafeteira elétrica 127V\",\r\n  \"price\": 199.90,\r\n  \"stockQuantity\": 50,\r\n  \"isActive\": true\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/products",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List all Products",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Camiseta Básica\",\r\n  \"description\": \"Camiseta 100% algodão\",\r\n  \"price\": 59.90,\r\n  \"stockQuantity\": 100,\r\n  \"isActive\": true\r\n}\r\n"
+				},
+				"url": {
+					"raw": "http://localhost:8000/products",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Atualizar produto por Id",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"name\": \"Cafeteira Plus\",\r\n        \"description\": \"Cafeteira elétrica Bivolt\",\r\n        \"sku\": \"0147e252-cd00-470e-aa8d-87a174545e86\",\r\n        \"price\": 200,\r\n        \"stockQuantity\": 500,\r\n        \"isActive\": true\r\n    }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/products/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"products",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Orders By CPF",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Camiseta Básica\",\r\n  \"description\": \"Camiseta 100% algodão\",\r\n  \"price\": 59.90,\r\n  \"stockQuantity\": 100,\r\n  \"isActive\": true\r\n}\r\n"
+				},
+				"url": {
+					"raw": "http://localhost:8000/orders?cpf=12345678900",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"orders"
+					],
+					"query": [
+						{
+							"key": "cpf",
+							"value": "12345678900"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Address",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"cpf\": \"1234567890\",\r\n  \"street\": \"Rua das Flores\",\r\n  \"number\": \"100\",\r\n  \"city\": \"Recife\",\r\n  \"state\": \"PE\",\r\n  \"zip\": \"50000-000\",\r\n  \"addressType\": \"residential\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/addresses",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"addresses"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List All Address",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Camiseta Básica\",\r\n  \"description\": \"Camiseta 100% algodão\",\r\n  \"price\": 59.90,\r\n  \"stockQuantity\": 100,\r\n  \"isActive\": true\r\n}\r\n"
+				},
+				"url": {
+					"raw": "http://localhost:8000/addresses",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"addresses"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Order",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"cpf\": \"12345678900\",\r\n  \"sku\": \"0147e252-cd00-470e-aa8d-87a174545e86\",\r\n  \"shippingAddressType\": \"residential\",\r\n  \"quantity\": 2\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/orders",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deletar produtos",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8000/products/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"products",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
