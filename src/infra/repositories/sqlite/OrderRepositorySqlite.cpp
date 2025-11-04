@@ -33,6 +33,10 @@ static Order row_to_order(sqlite3_stmt* s) {
 
 namespace ecocin::infra::repositories::sqlite {
 
+// Persiste um novo pedido no banco de dados.
+// O método recebe um objeto de domínio 'Order', calcula o valor total para garantir consistência,
+// define a data de criação e o insere na tabela 'orders'.
+// Este encapsulamento da lógica de criação assegura que todo pedido salvo seja válido e completo.
 Order OrderRepositorySqlite::create(const Order& in) {
     Order o = in;
 
@@ -67,6 +71,10 @@ Order OrderRepositorySqlite::create(const Order& in) {
     return o;
 }
 
+// Busca um pedido específico pelo seu ID.
+// A responsabilidade de executar a consulta e transformar o resultado em um objeto 'Order'
+// está contida neste método, seguindo o princípio de responsabilidade única.
+// O uso de `std::optional` comunica de forma clara a possibilidade de o pedido não ser encontrado.
 std::optional<Order> OrderRepositorySqlite::findById(long long id) {
     const char* sql =
         "SELECT id,client_id,product_id,shipping_address_id,quantity,unit_price,total_price,status,create_date "
@@ -87,6 +95,9 @@ std::optional<Order> OrderRepositorySqlite::findById(long long id) {
     return std::nullopt;
 }
 
+// Retorna uma lista de todos os pedidos existentes no sistema.
+// Este método abstrai a complexidade de consultar e mapear múltiplos registros do banco de dados,
+// fornecendo uma interface simples para a camada de serviço.
 std::vector<Order> OrderRepositorySqlite::listAll() {
     const char* sql =
         "SELECT id,client_id,product_id,shipping_address_id,quantity,unit_price,total_price,status,create_date "
@@ -104,6 +115,10 @@ std::vector<Order> OrderRepositorySqlite::listAll() {
     return out;
 }
 
+// Atualiza os dados de um pedido existente.
+// O método garante que o preço total seja recalculado antes de persistir as alterações,
+// mantendo a integridade dos dados. A lógica de atualização fica isolada nesta camada,
+// o que facilita a manutenção e evita duplicação de código.
 bool OrderRepositorySqlite::update(const Order& oIn) {
     Order o = oIn;
     o.calculateTotal();
@@ -133,6 +148,9 @@ bool OrderRepositorySqlite::update(const Order& oIn) {
     return changed > 0;
 }
 
+// Remove um pedido do banco de dados com base no seu ID.
+// A operação de exclusão é encapsulada, de modo que a camada de serviço
+// não precisa se preocupar com a sintaxe SQL ou o tratamento de conexões.
 bool OrderRepositorySqlite::remove(long long id) {
     const char* sql = "DELETE FROM orders WHERE id=?";
     sqlite3_stmt* st = nullptr;
@@ -145,6 +163,9 @@ bool OrderRepositorySqlite::remove(long long id) {
     return changed > 0;
 }
 
+// Lista todos os pedidos associados a um determinado cliente.
+// Este é um exemplo de método de consulta específico do negócio, que abstrai
+// uma necessidade comum da aplicação em uma chamada de método simples e clara.
 std::vector<Order> OrderRepositorySqlite::listByClientId(long long clientId) {
     const char* sql =
         "SELECT id,client_id,product_id,shipping_address_id,quantity,unit_price,total_price,status,create_date "
@@ -165,6 +186,9 @@ std::vector<Order> OrderRepositorySqlite::listByClientId(long long clientId) {
     return out;
 }
 
+// Atualiza apenas o status de um pedido específico.
+// Em vez de carregar e salvar o objeto 'Order' inteiro, este método realiza uma
+// operação mais performática e focada, demonstrando uma otimização comum em repositórios.
 bool OrderRepositorySqlite::updateStatus(long long id, const std::string& newStatus) {
     const char* sql = "UPDATE orders SET status=? WHERE id=?";
     sqlite3_stmt* st = nullptr;
@@ -180,6 +204,9 @@ bool OrderRepositorySqlite::updateStatus(long long id, const std::string& newSta
     return changed > 0;
 }
 
+// Altera o endereço de entrega de um pedido.
+// Assim como `updateStatus`, este método encapsula uma atualização parcial e específica,
+// o que melhora a eficiência e a clareza da intenção do código.
 bool OrderRepositorySqlite::updateShippingAddress(long long id, long long newAddressId) {
     const char* sql = "UPDATE orders SET shipping_address_id=? WHERE id=?";
     sqlite3_stmt* st = nullptr;

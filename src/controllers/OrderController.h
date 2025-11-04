@@ -14,10 +14,17 @@
 
 #include OATPP_CODEGEN_BEGIN(ApiController)
 
+// O OrderController é responsável por gerenciar as requisições HTTP relacionadas a pedidos.
+// Ele atua como o ponto de entrada para a criação e listagem de pedidos, orquestrando
+// a interação entre a camada de apresentação (HTTP) e a camada de lógica de negócio (serviço).
+// Este controller demonstra claramente a aplicação do padrão MVC.
 class OrderController : public oatpp::web::server::api::ApiController {
 private:
   std::shared_ptr<ecocin::services::OrderService> orderService_;
 
+  // Converte um objeto de domínio 'Address' em um 'AddressBriefDto'.
+  // Este DTO mais enxuto é usado para encapsular as informações do endereço de entrega
+  // dentro do DTO principal do pedido, evitando a exposição de dados desnecessários.
   static oatpp::Object<AddressBriefDto> toAddressBriefDto(const Address& a) {
     auto dto = AddressBriefDto::createShared();
     dto->street      = a.getStreet().c_str();
@@ -29,6 +36,10 @@ private:
     return dto;
   }
 
+  // Converte a estrutura 'OrderDetails' (que agrega dados de Pedido, Cliente, Produto e Endereço)
+  // em um 'OrderOutDto'. O uso de um DTO de saída específico para pedidos (`OrderOutDto`)
+  // é um exemplo de encapsulamento e abstração, pois permite que a API exponha uma visão
+  // consolidada e rica dos dados, sem acoplar o cliente da API à estrutura interna do domínio.
   static oatpp::Object<OrderOutDto> toOutDto(const ecocin::services::OrderDetails& d) {
     using namespace std::chrono;
     auto dto = OrderOutDto::createShared();
@@ -45,12 +56,18 @@ private:
   }
 
 public:
+  // O construtor utiliza injeção de dependência para receber o serviço de pedidos.
+  // Esta abordagem, central para o princípio de Inversão de Dependência, torna o controller
+  // mais modular, testável e fácil de manter, pois ele não depende de uma instância concreta do serviço.
   OrderController(const std::shared_ptr<oatpp::json::ObjectMapper>& objectMapper,
                   std::shared_ptr<ecocin::services::OrderService> service)
     : oatpp::web::server::api::ApiController(objectMapper),
       orderService_(std::move(service)) {}
 
-  // POST /orders
+  // Endpoint para criar um novo pedido.
+  // A responsabilidade do controller é validar a presença dos dados essenciais na requisição,
+  // extrair esses dados e passá-los para a camada de serviço, que contém a lógica de negócio
+  // complexa. O controller então traduz o resultado do serviço em uma resposta HTTP apropriada.
   ENDPOINT("POST", "/orders", createOrder,
            BODY_DTO(Object<OrderDto>, body)) {
     if (!body || !body->cpf || !body->sku || !body->shippingAddressType) {
@@ -74,7 +91,10 @@ public:
     return createResponse(Status::CODE_201);
   }
 
-  // GET /orders?cpf=...
+  // Endpoint para listar os pedidos de um cliente, identificado pelo CPF via query string.
+  // O controller extrai o parâmetro da query, invoca o serviço para obter os detalhes
+  // dos pedidos e, em seguida, utiliza os métodos de conversão para DTO para formatar
+  // a resposta. Este fluxo demonstra a clara separação de responsabilidades na arquitetura.
   ENDPOINT("GET", "/orders", listByCpf, QUERY(String, cpf)) {
     if (!cpf || cpf->empty()) {
       return createResponse(Status::CODE_400, "cpf é obrigatório");

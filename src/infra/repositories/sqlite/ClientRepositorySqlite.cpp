@@ -14,6 +14,11 @@ static Client row_to_client(sqlite3_stmt* s) {
     return client;
 }
 
+// Este método é responsável por adicionar um novo cliente ao banco de dados.
+// Ele recebe um objeto 'Client', define a data de criação, executa a inserção SQL
+// e, em seguida, atualiza o objeto com o ID gerado, retornando-o.
+// A abstração do acesso a dados permite que o resto da aplicação
+// manipule objetos 'Client' sem conhecer os detalhes do SQL.
 Client ecocin::infra::repositories::sqlite::ClientRepositorySqlite::create(const Client& in) {
     Client client = in;
 
@@ -37,6 +42,10 @@ Client ecocin::infra::repositories::sqlite::ClientRepositorySqlite::create(const
     return client;
 }
 
+// Realiza a busca de um cliente pelo seu ID único.
+// O método encapsula a consulta SQL e a lógica de mapeamento do resultado para um objeto 'Client'.
+// O uso de `std::optional` é uma boa prática que torna explícito que o cliente
+// pode não existir, evitando o uso de ponteiros nulos ou exceções para controle de fluxo.
 std::optional<Client> ecocin::infra::repositories::sqlite::ClientRepositorySqlite::findById(long long id) {
     const char* sql = "SELECT id,name,email,cpf,create_date FROM clients WHERE id=?";
     sqlite3_stmt* st = nullptr;
@@ -51,6 +60,9 @@ std::optional<Client> ecocin::infra::repositories::sqlite::ClientRepositorySqlit
     return std::nullopt;
 }
 
+// Busca um cliente utilizando o CPF, que é um identificador de negócio.
+// Assim como o `findById`, este método isola a lógica de acesso a dados
+// e utiliza `std::optional` para um retorno seguro e claro.
 std::optional<Client> ecocin::infra::repositories::sqlite::ClientRepositorySqlite::findByCpf(const std::string& cpf) {
     const char* sql = "SELECT id,name,email,cpf,create_date FROM clients WHERE cpf=?";
     sqlite3_stmt* st = nullptr;
@@ -65,6 +77,9 @@ std::optional<Client> ecocin::infra::repositories::sqlite::ClientRepositorySqlit
     return std::nullopt;
 }
 
+// Retorna uma lista com todos os clientes cadastrados.
+// A responsabilidade de consultar e montar a coleção de objetos 'Client'
+// é totalmente delegada a este método, simplificando as camadas superiores da aplicação.
 std::vector<Client> ecocin::infra::repositories::sqlite::ClientRepositorySqlite::listAll() {
     const char* sql = "SELECT id,name,email,cpf,create_date FROM clients ORDER BY id DESC";
     sqlite3_stmt* st = nullptr;
@@ -78,6 +93,10 @@ std::vector<Client> ecocin::infra::repositories::sqlite::ClientRepositorySqlite:
 }
 
 
+// Atualiza as informações de um cliente existente no banco de dados.
+// O método recebe um objeto 'Client' com os dados modificados e executa o comando UPDATE.
+// O retorno booleano informa se a operação afetou alguma linha, indicando o sucesso da atualização.
+// Isso demonstra o encapsulamento da lógica de modificação de dados.
 bool ecocin::infra::repositories::sqlite::ClientRepositorySqlite::update(const Client& c) {
     const char* sql = "UPDATE clients SET name=?, email=?, cpf=? WHERE id=?";
     sqlite3_stmt* st = nullptr;
@@ -92,6 +111,9 @@ bool ecocin::infra::repositories::sqlite::ClientRepositorySqlite::update(const C
     return changed > 0;
 }
 
+// Remove um cliente do sistema a partir do seu ID.
+// A complexidade da operação de exclusão no banco de dados é completamente
+// escondida da lógica de negócio, que apenas precisa invocar este método.
 bool ecocin::infra::repositories::sqlite::ClientRepositorySqlite::remove(long long id) {
     const char* sql = "DELETE FROM clients WHERE id=?";
     sqlite3_stmt* st = nullptr;

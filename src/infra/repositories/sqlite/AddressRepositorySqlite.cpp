@@ -19,6 +19,11 @@ static Address row_to_address(sqlite3_stmt* s) {
     return address;
 }
 
+// Este método encapsula a lógica para persistir um novo endereço no banco de dados.
+// Ele recebe um objeto de domínio 'Address', insere seus dados na tabela 'addresses'
+// e atualiza o objeto com o ID gerado pelo banco, retornando a entidade completa.
+// O encapsulamento aqui garante que a lógica de acesso a dados está isolada,
+// um princípio fundamental para a manutenibilidade do código.
 Address ecocin::infra::repositories::sqlite::AddressRepositorySqlite::create(const Address& in) {
     Address address = in;
     const char* sql = "INSERT INTO addresses(client_id,street,number,city,state,zip,address_type,create_date) VALUES(?,?,?,?,?,?,?,?)";
@@ -40,6 +45,10 @@ Address ecocin::infra::repositories::sqlite::AddressRepositorySqlite::create(con
     return address;
 }
 
+// Busca um endereço específico pelo seu ID. Este método demonstra o princípio
+// de responsabilidade única, onde a classe de repositório é a única que
+// sabe como consultar e construir um objeto 'Address' a partir de uma linha do banco de dados.
+// O uso de std::optional indica claramente que um endereço pode não ser encontrado.
 std::optional<Address> ecocin::infra::repositories::sqlite::AddressRepositorySqlite::findById(long long id) {
     const char* sql = "SELECT id,client_id,street,number,city,state,zip,address_type,create_date FROM addresses WHERE id=?";
     sqlite3_stmt* st = nullptr;
@@ -55,6 +64,9 @@ std::optional<Address> ecocin::infra::repositories::sqlite::AddressRepositorySql
 }
 
 
+// Retorna uma lista de todos os endereços associados a um cliente específico.
+// A consulta SQL é otimizada para ordenar os resultados, e o método abstrai
+// completamente a complexidade dessa operação para a camada de serviço.
 std::vector<Address> ecocin::infra::repositories::sqlite::AddressRepositorySqlite::listByClientId(long long clientId) {
     const char* sql =
         "SELECT id,client_id,street,number,city,state,zip,address_type,create_date "
@@ -73,6 +85,9 @@ std::vector<Address> ecocin::infra::repositories::sqlite::AddressRepositorySqlit
 }
 
 
+// Lista todos os endereços cadastrados no sistema.
+// Embora simples, este método mantém a consistência da interface do repositório,
+// fornecendo uma forma padronizada de acessar coleções de entidades.
 std::vector<Address> ecocin::infra::repositories::sqlite::AddressRepositorySqlite::listAll() {
     const char* sql = "SELECT id,client_id,street,number,city,state,zip,address_type,create_date FROM addresses ORDER BY id DESC";
     sqlite3_stmt* st = nullptr;
@@ -83,6 +98,9 @@ std::vector<Address> ecocin::infra::repositories::sqlite::AddressRepositorySqlit
     return out;
 }   
 
+// Atualiza os dados de um endereço existente. O método recebe um objeto 'Address'
+// e persiste suas alterações no banco de dados. A separação de interesses é clara:
+// o objeto de domínio contém os dados, e o repositório sabe como salvá-los.
 bool ecocin::infra::repositories::sqlite::AddressRepositorySqlite::update(const Address& addr) {
     const char* sql = "UPDATE addresses SET street=?, number=?, city=?, state=?, zip=?, address_type=? WHERE id=?";
     sqlite3_stmt* st = nullptr;
@@ -100,6 +118,9 @@ bool ecocin::infra::repositories::sqlite::AddressRepositorySqlite::update(const 
     return changes > 0;
 }   
 
+// Remove um endereço do banco de dados a partir do seu ID.
+// Esta operação é encapsulada para garantir que a remoção seja feita de forma segura
+// e que a lógica de negócio não precise se preocupar com os detalhes da exclusão no banco.
 bool ecocin::infra::repositories::sqlite::AddressRepositorySqlite::remove(long long id) {
     const char* sql = "DELETE FROM addresses WHERE id=?";
     sqlite3_stmt* st = nullptr;
@@ -109,4 +130,4 @@ bool ecocin::infra::repositories::sqlite::AddressRepositorySqlite::remove(long l
     int changes = sqlite3_changes(connection_.raw());
     sqlite3_finalize(st);
     return changes > 0;
-}   
+}

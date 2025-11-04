@@ -11,10 +11,19 @@
 
 #include OATPP_CODEGEN_BEGIN(ApiController)
 
+// O AddressController é a porta de entrada para as requisições HTTP relacionadas a endereços.
+// Ele herda de ApiController do framework OATPP, que gerencia o roteamento e a serialização/desserialização de dados.
+// Esta classe demonstra o padrão de projeto MVC (Model-View-Controller), onde o Controller
+// recebe a entrada do usuário (requisição HTTP), interage com o Model (através da camada de Serviço)
+// e retorna uma View (a resposta HTTP, geralmente em JSON).
 class AddressController : public oatpp::web::server::api::ApiController {
 private:
   std::shared_ptr<ecocin::services::AddressService> addressService;
 
+  // Converte um objeto de domínio 'Address' para um 'AddressOutDto' (Data Transfer Object).
+  // O uso de DTOs é uma prática de encapsulamento que desacopla a representação interna
+  // do domínio daquela exposta pela API. Isso permite que o modelo de domínio evolua
+  // sem quebrar os contratos da API.
   static oatpp::Object<AddressOutDto> toOutDto(const Address& a) {
     using namespace std::chrono;
     auto dto = AddressOutDto::createShared();
@@ -31,12 +40,20 @@ private:
   }
 
 public:
+  // O construtor utiliza injeção de dependência para receber o serviço de endereço.
+  // Isso segue o princípio da Inversão de Dependência, tornando o controller
+  // independente da forma como o serviço é criado e facilitando os testes unitários
+  // ao permitir a injeção de um serviço "mock".
   AddressController(const std::shared_ptr<oatpp::json::ObjectMapper>& objectMapper,
                     std::shared_ptr<ecocin::services::AddressService> service)
   : oatpp::web::server::api::ApiController(objectMapper),
     addressService(std::move(service)) {}
 
-  // POST /addresses  (CPF obrigatório)
+  // Define o endpoint para criar um novo endereço.
+  // A responsabilidade deste método é puramente de controle: ele extrai os dados da
+  // requisição (BODY_DTO), faz uma validação de entrada básica (CPF obrigatório),
+  // chama a camada de serviço para executar a lógica de negócio e, por fim,
+  // formata a resposta HTTP apropriada (201 Created ou 400 Bad Request).
   ENDPOINT("POST", "/addresses", createAddress,
            BODY_DTO(Object<AddressDto>, body)) {
     if (!body || !body->cpf || body->cpf->empty()) {
@@ -59,7 +76,10 @@ public:
     return createResponse(Status::CODE_201);
   }
 
-  // GET /addresses
+  // Define o endpoint para listar todos os endereços.
+  // O controller delega a busca dos dados para a camada de serviço, recebe a lista
+  // de objetos de domínio e a transforma em uma lista de DTOs para a resposta.
+  // Essa transformação garante que a API exponha apenas os dados necessários e no formato correto.
   ENDPOINT("GET", "/addresses", listAll) {
     const auto items = addressService->listAll();
     auto arr = oatpp::List<oatpp::Object<AddressOutDto>>::createShared();
@@ -69,7 +89,11 @@ public:
     return createDtoResponse(Status::CODE_200, arr);
   }
 
-  // GET /clients/{cpf}/addresses
+  // Define o endpoint para listar os endereços de um cliente específico.
+  // Este método extrai o CPF da URL (PATH), passa-o para o serviço e formata
+  // a lista resultante em uma resposta JSON. A responsabilidade do controller
+  // é gerenciar o fluxo da requisição e resposta, mantendo a lógica de negócio
+  // isolada na camada de serviço.
   ENDPOINT("GET", "/clients/{cpf}/addresses", listAddressesByCpf,
            PATH(String, cpf)) {
     auto list = addressService->listByCpf(std::string(cpf->c_str()));

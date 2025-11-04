@@ -29,6 +29,10 @@ static Product row_to_product(sqlite3_stmt* s) {
 
 namespace ecocin::infra::repositories::sqlite {
 
+// Insere um novo produto no banco de dados.
+// O método recebe um objeto 'Product', define sua data de criação e o persiste.
+// A lógica de conversão de tipos (como Uuid para string) e a montagem da instrução SQL
+// são encapsuladas aqui, mantendo a camada de serviço limpa e focada na regra de negócio.
 Product ProductRepositorySqlite::create(const Product& in) {
     Product p = in;
     const auto now   = std::chrono::system_clock::now();
@@ -58,6 +62,10 @@ Product ProductRepositorySqlite::create(const Product& in) {
     return p;
 }
 
+// Busca um produto pelo seu ID.
+// Este método demonstra a abstração do acesso a dados, escondendo a complexidade
+// da consulta SQL e do mapeamento de colunas para os atributos do objeto 'Product'.
+// O retorno `std::optional` gerencia de forma elegante o caso em que o produto não é encontrado.
 std::optional<Product> ProductRepositorySqlite::findById(long long id) {
     const char* sql =
         "SELECT id,name,description,sku,price,stock_quantity AS stock,is_active,create_date "
@@ -76,6 +84,9 @@ std::optional<Product> ProductRepositorySqlite::findById(long long id) {
     return std::nullopt;
 }
 
+// Localiza um produto pelo seu SKU (Stock Keeping Unit), um identificador único de negócio.
+// Fornecer métodos de busca por diferentes chaves de negócio é uma prática comum
+// em repositórios para dar flexibilidade à camada de serviço.
 std::optional<Product> ProductRepositorySqlite::findBySku(const std::string& sku) {
     const char* sql =
         "SELECT id,name,description,sku,price,stock_quantity AS stock,is_active,create_date "
@@ -94,6 +105,9 @@ std::optional<Product> ProductRepositorySqlite::findBySku(const std::string& sku
     return std::nullopt;
 }
 
+// Retorna uma lista com todos os produtos cadastrados.
+// O método encapsula a iteração sobre o resultado da consulta e a construção
+// da coleção de objetos 'Product', simplificando o código que o consome.
 std::vector<Product> ProductRepositorySqlite::listAll() {
     const char* sql =
         "SELECT id,name,description,sku,price,stock_quantity AS stock,is_active,create_date "
@@ -110,6 +124,10 @@ std::vector<Product> ProductRepositorySqlite::listAll() {
     return out;
 }
 
+// Atualiza as informações de um produto existente.
+// A responsabilidade de mapear os atributos do objeto 'Product' para os parâmetros
+// da instrução SQL UPDATE está totalmente contida neste método.
+// O retorno booleano fornece um feedback claro sobre o sucesso da operação.
 bool ProductRepositorySqlite::update(const Product& p) {
     const char* sql =
         "UPDATE products SET name=?, description=?, sku=?, price=?, stock_quantity=?, is_active=? "
@@ -134,6 +152,9 @@ bool ProductRepositorySqlite::update(const Product& p) {
     return changed > 0;
 }
 
+// Exclui um produto do banco de dados usando seu ID.
+// Este método abstrai a operação de deleção, garantindo que a camada de serviço
+// não precise lidar diretamente com o SQL, o que aumenta a segurança e a manutenibilidade.
 bool ProductRepositorySqlite::remove(long long id) {
     const char* sql = "DELETE FROM products WHERE id=?";
     sqlite3_stmt* st = nullptr;
