@@ -60,7 +60,7 @@ Product ProductRepositorySqlite::create(const Product& in) {
 
 std::optional<Product> ProductRepositorySqlite::findById(long long id) {
     const char* sql =
-        "SELECT id,name,description,sku,price,stock_quantity AS stock,is_active,create_date"
+        "SELECT id,name,description,sku,price,stock_quantity AS stock,is_active,create_date "
         "FROM products WHERE id=?";
 
     sqlite3_stmt* st = nullptr;

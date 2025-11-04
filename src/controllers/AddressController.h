@@ -56,7 +56,7 @@ public:
     if (!created) {
       return createResponse(Status::CODE_400, "CPF não encontrado");
     }
-    return createDtoResponse(Status::CODE_201, toOutDto(*created));
+    return createResponse(Status::CODE_201);
   }
 
   // GET /addresses

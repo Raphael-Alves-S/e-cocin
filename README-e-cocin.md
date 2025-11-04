@@ -1,6 +1,31 @@
 
 # e-cocin — Setup (Windows + MSYS2/MinGW64) e Build
 
+Este guia explica como configurar o ambiente de desenvolvimento, construir e executar o projeto e-cocin.
+
+## Visão Geral
+
+e-cocin é uma API REST para um sistema de e-commerce, construída em C++ com o framework Oat++.
+
+## Funcionalidades
+
+*   Gerenciamento de Clientes
+*   Gerenciamento de Produtos
+*   Gerenciamento de Endereços
+*   Criação e consulta de Pedidos
+
+## Tecnologias Utilizadas
+
+*   **C++20**
+*   **Oat++**: Framework para desenvolvimento de APIs REST.
+*   **CMake**: Sistema de build.
+*   **SQLite**: Banco de dados.
+*   **MinGW64 (MSYS2)**: Toolchain para compilação no Windows.
+
+---
+
+## 1. Configuração do Ambiente (Windows + MSYS2/MinGW64)
+
 Este guia explica **exatamente** como reproduzir o ambiente que usamos:
 
 - **MinGW64 (MSYS2)** como toolchain (GCC 15+)
@@ -8,18 +33,27 @@ Este guia explica **exatamente** como reproduzir o ambiente que usamos:
 - Dependências via **FetchContent** (nlohmann/json, spdlog, Catch2)
 - **SQLite** do MSYS2 (via `find_package(SQLite3)`)
 
-> Estrutura que estou assumindo no repo:
+> Estrutura atual do projeto:
 >
 > ```
 > e-cocin/
 > ├─ .vscode/
+> ├─ build/
 > ├─ cmake/
 > │  └─ third_party.cmake
 > ├─ src/
-> │  └─ main.cpp
+> │  ├─ app/
+> │  ├─ controllers/
+> │  ├─ domain/
+> │  ├─ infra/
+> │  ├─ services/
+> │  └─ ECocinApplication.cpp
 > ├─ tests/
 > │  └─ test_example.cpp
-> └─ CMakeLists.txt
+> ├─ .gitignore
+> ├─ CMakeLists.txt
+> ├─ documentation.md
+> └─ README-e-cocin.md
 > ```
 >
 > **Não** comite a pasta `build/`.
@@ -44,14 +78,11 @@ pacman -Syu
 # Feche o terminal e abra de novo, depois repita:
 pacman -Syu
 
-# Instalar toolchain e utilitários
-pacman -S --needed base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-cmake git
+# Instalar toolchain, utilitários e SQLite
+pacman -S --needed base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-cmake git mingw-w64-x86_64-sqlite3
 
 # (opcional) Ninja para builds rápidos
 pacman -S --needed mingw-w64-x86_64-ninja
-
-# SQLite (pacote oficial do MSYS2)
-pacman -S --needed mingw-w64-x86_64-sqlite3
 ```
 
 ### 1.4 Verificar versões
@@ -75,100 +106,41 @@ cd /SeuDiretorio/e-cocin
 
 ---
 
-## 3) CMakeLists.txt (resumo)
+## 3) CMakeLists.txt
 
-```cmake
-cmake_minimum_required(VERSION 3.20...4.1)
-cmake_policy(VERSION 3.10)
-
-project(e_cocin CXX)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-include(cmake/third_party.cmake)
-
-find_package(SQLite3 REQUIRED)
-
-add_executable(ecommerce src/main.cpp)
-
-target_include_directories(ecommerce PRIVATE src)
-
-target_link_libraries(ecommerce
-  PRIVATE
-    SQLite::SQLite3
-    nlohmann_json::nlohmann_json
-    spdlog::spdlog_header_only
-)
-
-enable_testing()
-add_executable(unit_tests tests/test_example.cpp)
-target_link_libraries(unit_tests PRIVATE Catch2::Catch2WithMain)
-add_test(NAME example_test COMMAND unit_tests)
-```
+O `CMakeLists.txt` principal orquestra o build. Ele é responsável por:
+*   Definir a versão do C++ (C++20).
+*   Incluir o `third_party.cmake` para gerenciar dependências externas.
+*   Encontrar o pacote do SQLite3.
+*   Definir o executável principal (`e-cocin`) e seus arquivos-fonte.
+*   Vincular todas as bibliotecas necessárias (Oat++, SQLite, etc.).
+*   Configurar o alvo de testes.
 
 ---
 
-## 4) third_party.cmake
+## 4) Gerenciamento de Dependências (`cmake/third_party.cmake`)
 
-```cmake
-include(FetchContent)
+As dependências externas são gerenciadas pelo `FetchContent` do CMake no arquivo `cmake/third_party.cmake`. Isso garante que as versões corretas das bibliotecas sejam baixadas e compiladas junto com o projeto.
 
-FetchContent_Declare(nlohmann_json
-  GIT_REPOSITORY https://github.com/nlohmann/json.git
-  GIT_TAG v3.11.2
-)
-FetchContent_MakeAvailable(nlohmann_json)
-
-FetchContent_Declare(spdlog
-  GIT_REPOSITORY https://github.com/gabime/spdlog.git
-  GIT_TAG v1.13.0
-)
-FetchContent_MakeAvailable(spdlog)
-
-FetchContent_Declare(catch2
-  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-  GIT_TAG v3.5.2
-)
-FetchContent_MakeAvailable(catch2)
-```
+As dependências incluem:
+*   **nlohmann/json**: Para manipulação de JSON.
+*   **spdlog**: Para logging.
+*   **Catch2**: Para os testes unitários.
+*   **oatpp**: O framework web principal.
 
 ---
 
-## 5) Código mínimo
+## 5) Estrutura do Código-Fonte (`src/`)
 
-**src/main.cpp**
-```cpp
-#include <nlohmann/json.hpp>
-#include <spdlog/spdlog.h>
-#include <sqlite3.h>
-#include <iostream>
+O código-fonte é organizado em uma arquitetura de camadas para promover a separação de responsabilidades:
 
-int main() {
-  nlohmann::json j = { {"hello", "world"}, {"answer", 42} };
-  spdlog::info("JSON: {}", j.dump());
+*   `app/`: Contém a lógica de inicialização da aplicação, como as migrações do banco de dados.
+*   `controllers/`: Responsável por receber as requisições HTTP, validar os dados e interagir com a camada de serviço.
+*   `domain/`: Contém as entidades de negócio (`Client`, `Product`, etc.) e as interfaces dos repositórios.
+*   `infra/`: Implementação da infraestrutura, como a conexão com o banco de dados e as implementações concretas dos repositórios.
+*   `services/`: Contém a lógica de negócio da aplicação.
+*   `ECocinApplication.cpp`: O ponto de entrada da aplicação (`main`).
 
-  sqlite3* db = nullptr;
-  if (sqlite3_open(":memory:", &db) == SQLITE_OK) {
-    spdlog::info("SQLite in-memory OK");
-    sqlite3_close(db);
-  } else {
-    spdlog::error("Falha ao abrir SQLite");
-  }
-
-  std::cout << "e-cocin build OK\n";
-  return 0;
-}
-```
-
-**tests/test_example.cpp**
-```cpp
-#include <catch2/catch_all.hpp>
-TEST_CASE("smoke") { REQUIRE(2 + 2 == 4); }
-```
-
----
 
 ## 6) Build e execução
 
@@ -186,8 +158,9 @@ cmake --build build -j
 
 # Testes (opcional)
 ctest --test-dir build --output-on-failure
-
 ```
+
+Após a execução, a API estará disponível em `http://localhost:8000`.
 
 ---
 
@@ -236,55 +209,46 @@ Saída esperada:
 [info] JSON: {"answer":42,"hello":"world"}
 [info] SQLite in-memory OK
 e-cocin build OK
+🚀 API rodando em http://localhost:8000
 1/1 Test #1: example_test ..........   Passed
 ```
 
 Tudo certo 🎉
 
+---
 
-por que usamos virtual nos métodos do repositório?
-→ porque o repositório é uma interface, não uma implementação.
+## 11) Rotas da API
 
-Em C++, quando você quer declarar uma interface (como em Java), você faz isso usando métodos virtuais puros (= 0) dentro de uma classe-base.
+A seguir, a lista de rotas disponíveis na API.
 
-🧱 exemplo prático (seu caso)
-class IClientRepository {
-public:
-    virtual ~IClientRepository() = default;
+### Clientes (`/clients`)
 
-    virtual Client create(const Client& in) = 0;
-    virtual std::optional<Client> findById(long long id) = 0;
-    virtual std::vector<Client> listAll() = 0;
-    virtual bool update(const Client& c) = 0;
-    virtual bool remove(long long id) = 0;
-};
+*   `POST /clients`: Cria um novo cliente.
+    *   **Body**: `{ "name": "string", "email": "string", "cpf": "string" }`
+*   `GET /clients`: Lista todos os clientes.
+*   `GET /clients/{id}`: Busca um cliente pelo ID.
+*   `GET /clients/cpf/{cpf}`: Busca um cliente pelo CPF.
 
+### Produtos (`/products`)
 
-➡️ Aqui, IClientRepository é abstrata — você não pode instanciá-la diretamente.
+*   `POST /products`: Cria um novo produto.
+    *   **Body**: `{ "name": "string", "description": "string", "price": number, "stockQuantity": integer, "isActive": boolean, "sku": "string" }`
+*   `GET /products`: Lista todos os produtos.
+*   `GET /products/{id}`: Busca um produto pelo ID.
+*   `GET /products/sku/{sku}`: Busca um produto pelo SKU.
+*   `PUT /products/{id}`: Atualiza um produto.
+    *   **Body**: `{ "name": "string", "description": "string", "price": number, "stockQuantity": integer, "isActive": boolean, "sku": "string" }`
+*   `DELETE /products/{id}`: Remove um produto.
 
-Depois, uma classe concreta implementa essa interface:
+### Endereços (`/addresses`)
 
-class ClientRepositorySqlite : public IClientRepository {
-public:
-    Client create(const Client& in) override;
-    std::optional<Client> findById(long long id) override;
-    std::vector<Client> listAll() override;
-    bool update(const Client& c) override;
-    bool remove(long long id) override;
-};
+*   `POST /addresses`: Cria um novo endereço para um cliente.
+    *   **Body**: `{ "cpf": "string", "street": "string", "number": "string", "city": "string", "state": "string", "zip": "string", "addressType": "string" }`
+*   `GET /addresses`: Lista todos os endereços.
+*   `GET /clients/{cpf}/addresses`: Lista todos os endereços de um cliente específico.
 
-⚙️ o que significa cada parte
+### Pedidos (`/orders`)
 
-virtual → permite que o método seja sobrescrito (override) em classes derivadas.
-
-= 0 → indica que é puro, ou seja, a classe não fornece implementação (é abstrata).
-
-override (na implementação) → avisa ao compilador que você está substituindo um método virtual da base.
-
-
-benefícios do uso de virtual
-
-✅ Abstração — você programa contra a interface (IClientRepository* repo) e não a implementação.
-✅ Inversão de dependência — facilita testes unitários (mockar um repositório sem precisar do banco).
-✅ Flexibilidade — no futuro, pode ter ClientRepositoryPostgres, ClientRepositoryInMemory, etc.
-✅ Polimorfismo — permite trocar a implementação sem mudar quem usa a interface.
+*   `POST /orders`: Cria um novo pedido.
+    *   **Body**: `{ "cpf": "string", "sku": "string", "shippingAddressType": "string", "quantity": integer }`
+*   `GET /orders?cpf={cpf}`: Lista todos os pedidos de um cliente.

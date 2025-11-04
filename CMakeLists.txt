@@ -32,6 +32,9 @@ target_sources(e_cocin PRIVATE
   src/domain/entities/Address.cpp
   src/services/AddressService.cpp
   src/infra/repositories/sqlite/AddressRepositorySqlite.cpp
+  src/domain/entities/Order.cpp
+  src/services/OrderService.cpp
+  src/infra/repositories/sqlite/OrderRepositorySqlite.cpp
 
 )
 

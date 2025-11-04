@@ -23,6 +23,10 @@
 #include "infra/repositories/sqlite/AddressRepositorySqlite.h"
 #include "services/AddressService.h"
 
+#include "controllers/OrderController.h"
+#include "infra/repositories/sqlite/OrderRepositorySqlite.h"
+#include "services/OrderService.h"
+
 
 int main() {
   // Migrations
@@ -41,6 +45,11 @@ int main() {
   auto addressRepo    = std::make_shared<ecocin::infra::repositories::sqlite::AddressRepositorySqlite>(cx);
   auto addressService = std::make_shared<ecocin::services::AddressService>(*addressRepo, *clientRepo);
 
+  // Order Repo + Service
+  auto orderRepo    = std::make_shared<ecocin::infra::repositories::sqlite::OrderRepositorySqlite>(cx);
+  auto orderService = std::make_shared<ecocin::services::OrderService>(
+      *orderRepo, *clientRepo, *productRepo, *addressRepo);
+
   // OATPP
   oatpp::Environment::init();
 
@@ -55,6 +64,9 @@ int main() {
 
   auto addressController = std::make_shared<AddressController>(objectMapper, addressService);
   router->addController(addressController);
+
+  auto orderController = std::make_shared<OrderController>(objectMapper, orderService);
+  router->addController(orderController);
 
   auto connectionHandler = oatpp::web::server::HttpConnectionHandler::createShared(router);
   auto provider = oatpp::network::tcp::server::ConnectionProvider::createShared(
