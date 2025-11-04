@@ -296,3 +296,15 @@ std::optional<Client> ClientService::getClientByCpf(const std::string& cpf) {
     return clientRepository_.findByCpf(cpf);
 }
 ```
+## Divisão do Projeto
+
+* Kauã Wallace Silva Melo: responsáve de `controllers` ; relatório e GitHubPages
+
+* KLismman Luan Cabral Silva: responsável por `entities`; apresentação e roteiro do vídeo
+
+* Luiz Ribeiro da Silva Neto: responsável por `services`; relatório e GitHubPages
+
+* Raphael Alves da Silva: responsável por `repositories` e banco de dados
+
+
+
